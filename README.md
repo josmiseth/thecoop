@@ -14,6 +14,31 @@ This is a Raspberry Pi project for making a smart chicken coop. The first goal i
 ![Relay wiring details](https://github.com/josmiseth/thecoop/blob/main/img/relay_wiring.jpeg "Relay wiring details")
 
 
+# Temperature sensor setup
+
+https://www.circuitbasics.com/raspberry-pi-ds18b20-temperature-sensor-tutorial/
+
+# Diode setup
+
+Blinking: https://www.google.com/amp/s/www.teknotut.com/en/first-raspberry-pi-project-blink-led/amp/
+
+Breathing diode: https://www.admfactory.com/breathing-light-led-on-raspberry-pi-using-python/
 
 
-SSH setup: https://www.google.com/amp/s/garywoodfine.com/setting-up-ssh-keys-for-github-access/%3Famp
+# Mobile phone controller  
+
+https://www.swift.org/getting-started/ https://www.swift.org/getting-started/
+
+
+# Configure development environment 
+
+SSH setup for GitHub: https://www.google.com/amp/s/garywoodfine.com/setting-up-ssh-keys-for-github-access/%3Famp
+
+VScode: https://code.visualstudio.com/docs/setup/raspberry-pi
+
+
+# Examples 
+
+https://www.backyardchickens.com/articles/a-raspberry-pi-controlled-diy-coop-door-with-python-code.74113/
+
+
