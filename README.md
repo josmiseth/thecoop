@@ -4,6 +4,8 @@ This is a Raspberry Pi project for making a smart chicken coop. The first goal i
 
 # GPIO pinout for Raspberry Pi 3 B+
 
+![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins_2.jpeg "GPIO pinout")
+
 ![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins.jpeg "GPIO pinout")
 
 
