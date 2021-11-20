@@ -29,6 +29,11 @@ Blinking: https://www.google.com/amp/s/www.teknotut.com/en/first-raspberry-pi-pr
 Breathing diode: https://www.admfactory.com/breathing-light-led-on-raspberry-pi-using-python/
 
 
+# Hall sensor
+
+https://learn.sunfounder.com/lesson-1-hall-sensor/
+
+
 # Mobile phone controller  
 
 https://www.swift.org/getting-started/ https://www.swift.org/getting-started/
