@@ -22,6 +22,8 @@ https://www.circuitbasics.com/raspberry-pi-ds18b20-temperature-sensor-tutorial/
 
 # Diode setup
 
+https://www.electronicwings.com/raspberry-pi/raspberry-pi-pwm-generation-using-python-and-c
+
 Blinking: https://www.google.com/amp/s/www.teknotut.com/en/first-raspberry-pi-project-blink-led/amp/
 
 Breathing diode: https://www.admfactory.com/breathing-light-led-on-raspberry-pi-using-python/
