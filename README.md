@@ -11,13 +11,10 @@ This is a Raspberry Pi project for making a smart chicken coop. The first goal i
 
 # Relay setup
 
+Test code: https://github.com/josmiseth/thecoop/blob/main/test/scripts/relay.py
+
 ![Setup for relay](https://github.com/josmiseth/thecoop/blob/main/img/relay_wiring_complete.jpeg "Relay wiring overview")
 
-<!--
-![Setup for relay](https://github.com/josmiseth/thecoop/blob/main/img/relay_wiring_overview.jpeg "Relay wiring overview")
-
-![Relay wiring details](https://github.com/josmiseth/thecoop/blob/main/img/relay_wiring.jpeg "Relay wiring details")
--->
 
 # Temperature sensor setup
 
