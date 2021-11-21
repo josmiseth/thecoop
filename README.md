@@ -28,6 +28,11 @@ Blinking: https://www.google.com/amp/s/www.teknotut.com/en/first-raspberry-pi-pr
 
 Breathing diode: https://www.admfactory.com/breathing-light-led-on-raspberry-pi-using-python/
 
+# Temperature relay setup
+
+The hatch should not open if the outside temperature is lower than a specified temperature. This is controlled by an external unit where the user can set the limit temperature, and a relay is is set depending on if the outdoor temperature is higher or lower than this. There is also a buffer temperature difference to avoid that the relay switches multiple times when the temperature is oscillating at the limit. The Raspberry Pi needs to measure the state of the relay. This would be equivalent to reading the position of a switch.
+
+https://projects.raspberrypi.org/en/projects/physical-computing/5
 
 # Hall sensor
 
