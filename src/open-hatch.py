@@ -5,10 +5,10 @@
 Relay wiring
 
 Relay channel     Wire color     RB Port     Function
-    4             Yellow         GPIO17
-    3             Green          GPIO05
-    2             Dark blue      GPIO06
-    1             Blue           GPIO07     
+    4             Yellow         GPIO17      Minus wire hatch up
+    3             Green          GPIO05      Plus wire hatch up
+    2             Dark blue      GPIO06      Plus wire hatch down
+    1             Blue           GPIO07      Minus wire hatch down
 
 '''
 
@@ -20,7 +20,7 @@ import RPi.GPIO as GPIO
 print("Open hatch")
 relay_minus_up = 17
 relay_plus_up = 5
-time_to_run = 5.0
+time_to_run = 10.0
 state_file_name = "/tmp/thecoop/hatch_status.txt"
 
 def set_hatch_status(status, filename):
