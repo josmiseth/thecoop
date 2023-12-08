@@ -14,7 +14,7 @@ app = Flask(__name__)
 @app.route('/')
 def index():
   
-    input_state = GPIO.input(12) #Read and store value of input to a variable
+    input_state = GPIO.input(21) #Read and store value of input to a variable
     if input_state == False:     #Check whether pin is grounded
        print('Button Pressed')   #Print 'Button Pressed'
        time.sleep(0.5)           #Delay of 0.5s
