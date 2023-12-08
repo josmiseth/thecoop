@@ -46,7 +46,11 @@ https://www.swift.org/getting-started/ https://www.swift.org/getting-started/
 
 # Configure development environment 
 
+Enable SSH on device: https://raspberrypi-guide.github.io/networking/connecting-via-ssh#:~:text=Enable%20SSH%20on%20the%20Raspberry%20Pi,-By%20default%2C%20SSH&text=To%20enable%20SSH%20via%20the,to%20SSH%20and%20click%20OK%20.
+
 SSH setup for GitHub: https://www.google.com/amp/s/garywoodfine.com/setting-up-ssh-keys-for-github-access/%3Famp
+
+Clone repo: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
 
 VScode: https://code.visualstudio.com/docs/setup/raspberry-pi
 
