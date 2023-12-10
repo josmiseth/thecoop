@@ -59,4 +59,13 @@ VScode: https://code.visualstudio.com/docs/setup/raspberry-pi
 
 https://www.backyardchickens.com/articles/a-raspberry-pi-controlled-diy-coop-door-with-python-code.74113/
 
+Used for thermostat 0/1 readout:
+https://raspberrypi.stackexchange.com/questions/5083/read-input-from-the-gpio
+
+Generally on pull-up resistors and switches:
+https://grantwinney.com/using-pullup-and-pulldown-resistors-on-the-raspberry-pi/
+
+Run program at startup:
+https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
+
 
