@@ -16,13 +16,18 @@ import time
 from time import sleep
 import RPi.GPIO as GPIO
 
+def print_text():
+    print("Scheduled event")
+    
+    return
+
 def set_hatch_status(status, filename):
     
     with open(filename, 'w') as file:
         file.write(status)
     return
 
-def open_hatch()
+def open_hatch():
 
     print("Open hatch")
     relay_minus_up = 17
