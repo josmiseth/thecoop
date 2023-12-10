@@ -19,7 +19,7 @@ print("Close hatch")
 relay_plus_down = 6
 relay_minus_down = 7
 time_to_run = 10.0
-state_file_name = "/tmp/hatch_status.txt"
+state_file_name = "/tmp/thecoop/hatch_status.txt"
 
 def set_hatch_status(status, filename):
     
