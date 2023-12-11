@@ -71,3 +71,6 @@ https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-sta
 Log run at startup:
 https://en.wikipedia.org/wiki/Nohup
 
+Crontab tips:
+https://crontab.guru/every-1-minute
+
