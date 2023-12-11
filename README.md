@@ -68,4 +68,6 @@ https://grantwinney.com/using-pullup-and-pulldown-resistors-on-the-raspberry-pi/
 Run program at startup:
 https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
 
+Log run at startup:
+https://en.wikipedia.org/wiki/Nohup
 
