@@ -34,6 +34,11 @@ The hatch should not open if the outside temperature is lower than a specified t
 
 https://projects.raspberrypi.org/en/projects/physical-computing/5
 
+https://raspberrypi.stackexchange.com/questions/5083/read-input-from-the-gpio
+
+https://grantwinney.com/using-pullup-and-pulldown-resistors-on-the-raspberry-pi/
+        
+
 # Hall sensor
 
 https://learn.sunfounder.com/lesson-1-hall-sensor/
@@ -70,6 +75,9 @@ https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-sta
 
 Log run at startup:
 https://en.wikipedia.org/wiki/Nohup
+
+APScheduler and crontab example:
+https://www.javatpoint.com/apschedular-python-example
 
 Crontab tips:
 https://crontab.guru/every-1-minute
