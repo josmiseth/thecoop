@@ -5,6 +5,18 @@
 !!!   MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI  !!!
 
 
+
+Relay wiring
+
+Relay channel     Wire color     RB Port     Function
+    4             Yellow         GPIO17      Minus wire hatch up
+    3             Green          GPIO05      Plus wire hatch up
+    2             Dark blue      GPIO06      Plus wire hatch down
+    1             Blue           GPIO07      Minus wire hatch down
+
+
+
+
 '''
 
 import os
@@ -15,6 +27,15 @@ status_file_name = "hatch_status.txt"
 STATUS_CLOSED = '0'
 STATUS_OPEN = '1'
 STATUS_IN_MOTION = '2'
+OPEN_HATCH_TIME_TO_RUN = 10
+CLOSE_HATCH_TIME_TO_RUN = 10
+
+PIN_RELAY_MINUS_UP = 17
+PIN_RELAY_PLUS_UP = 5        
+PIN_RELAY_PLUS_DOWN = 6
+PIN_RELAY_MINUS_DOWN = 7
+PIN_TEMP_RELAY = 18
+PIN_PUSH_BUTTON = 23
 
 
 def set_hatch_status(status, filename):
@@ -33,7 +54,9 @@ def init_status_file_folder(folder):
     
     return
 
+
 print("Init package from __init__.py")
+print("\n \n MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI \n \n")
 
 init_status_file_folder(status_file_folder)
 
