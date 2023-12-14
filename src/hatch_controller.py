@@ -3,10 +3,11 @@
 import time
 import os
 import sys
+import logging
 sys.path.append('/home/pi/projects/thecoop/')
 
+
 from apscheduler.schedulers.background import BackgroundScheduler
-from src import open_hatch
 import src as thecoop
 
 
@@ -29,7 +30,9 @@ def get_hatch_status(filename):
     return status
 
 def is_hightemp():
-    print("probing temperature")
+    logger = logging.getLogger('hatch_logger')
+    logger.info("probing temperature")
+    
     state = False
     try:
         GPIO.setmode(GPIO.BCM)
@@ -39,30 +42,31 @@ def is_hightemp():
         print("")
         
     if state:
-        print("Temperature is above set minimum temperature")
+        logger.info("Temperature is above set minimum temperature")
     else:
-        print("Temperature is below set minimum temperature")
+        logger.info("Temperature is below set minimum temperature")
     return state
 
 def open_hatch():
-
+    logger = logging.getLogger('hatch_logger')
     print("Event: Open hatch")
+    logger.info("Event: Open hatch")
     
 
     # First, check if hatch is open. Is , do not open
     print("Checking hatch status")
     if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
-        print("Hatch is not closed, not proceding with opening hatch")
+        logger.warning("Hatch is not closed, not proceding with opening hatch")
     elif not is_hightemp():
     # Check if temperature is too low
-        print("Temperature is low. Hatch not opening")
+        logger.info("Temperature is low. Hatch not opening")
     else:
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(thecoop.PIN_RELAY_PLUS_UP, GPIO.OUT)
         GPIO.setup(thecoop.PIN_RELAY_MINUS_UP, GPIO.OUT)
 
-        print("Hatch in motion")
+        logger.info("Hatch in motion")
         #Save hatch status running to file
         set_hatch_status(thecoop.STATUS_IN_MOTION, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
 
@@ -71,22 +75,28 @@ def open_hatch():
 
         time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
 
+        GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.HIGH)
+        GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.HIGH)
+
+
         #Save hatch status open to file
         set_hatch_status(thecoop.STATUS_OPEN, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
         print("Hatch open\n\n")
+        logger.info("Hatch open")
 
     return
 
 
 def close_hatch():
+    logger = logging.getLogger('hatch_logger')
 
     print("Event: Close hatch")
-
+    logger.info("Event: Close hatch")
 
     # First, check if hatch is closed. Is , do not close
     print("Checking hatch status")
     if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_OPEN:
-        print("Hatch is not open, not proceding with closing hatch")
+        logger.warning("Hatch is not open, not proceding with closing hatch")
     else:
     
         GPIO.setmode(GPIO.BCM)
@@ -100,43 +110,51 @@ def close_hatch():
         GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.LOW)
 
         time.sleep(thecoop.CLOSE_HATCH_TIME_TO_RUN)
-
+        
+        GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.HIGH)
+        GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.HIGH)
         #Save hatch status open to file
         set_hatch_status(thecoop.STATUS_CLOSED, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
 
         print("Hatch closed\n\n")
+        logger.info("Hatch closed")
 
     return
 
 def button_pushed(channel):
-    print("Button pushed")
+    logger.info("Event: Button pushed")
     
     hatch_status = get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
     
     if GPIO.input(channel) == GPIO.HIGH:
         if hatch_status == thecoop.STATUS_CLOSED:
-            print("Open hatch")
+            logger.info("Open hatch")
             open_hatch()       
         elif hatch_status == thecoop.STATUS_OPEN:
-            print("Close hatch")
+            logger.info("Close hatch")
             close_hatch()
         elif hatch_status == thecoop.STATUS_IN_MOTION:
-            print("Hatch in motion. Doing nothing to change that")
-    print("End button pushed\n")
+            logger.waring("Hatch in motion. Doing nothing to change that")
+    logger.info("End button pushed\n")
         
         
 # Main script starting here
-
-print("Setting up background scheduler")
+print("Start main script")
+logger = logging.getLogger('hatch_logger')
+logger.info("Starting logger")
+logger.info("Setting up background scheduler")
 sched = BackgroundScheduler()
 
-print("Adding cron job")
-sched.add_job(open_hatch, 'cron', hour=19, minute=52)
-sched.add_job(close_hatch, 'cron', hour=19, minute=53)
 
+logger.info("Adding cron job")
+sched.add_job(open_hatch, 'cron', hour=9, minute=1)
+sched.add_job(close_hatch, 'cron', hour=17, minute=1)
 
+sched.print_jobs()
+    
 print("Starting cron job")
 sched.start()
+
 
 try:
     GPIO.setmode(GPIO.BCM)
