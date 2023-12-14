@@ -32,7 +32,7 @@ def open_hatch():
     print("Open hatch")
     relay_minus_up = 17
     relay_plus_up = 5
-    time_to_run = 10.0
+    time_to_run = 2.0
     state_file_name = "/tmp/thecoop/hatch_status.txt"
 
 
@@ -48,12 +48,17 @@ def open_hatch():
 
     time.sleep(time_to_run)
 
+    GPIO.output(relay_plus_up, GPIO.HIGH)
+    GPIO.output(relay_minus_up, GPIO.HIGH)
 
-    GPIO.cleanup()
-
+    time.sleep(time_to_run)
     #Save hatch status open to file
     #Save hatch status running to file
     set_hatch_status("open", state_file_name)
 
     print("Open hatch finished")
     return
+
+open_hatch()
+print("End")
+GPIO.cleanup()
