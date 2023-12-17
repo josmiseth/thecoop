@@ -32,6 +32,7 @@ def get_hatch_status(filename):
 def is_hightemp():
     logger = logging.getLogger('hatch_logger')
     logger.info("probing temperature")
+    print("Probing temperature")
     
     state = False
     try:
@@ -43,8 +44,10 @@ def is_hightemp():
         
     if state:
         logger.info("Temperature is above set minimum temperature")
+        print("High temperature")
     else:
         logger.info("Temperature is below set minimum temperature")
+        print("Low temperature")
     return state
 
 def open_hatch():
@@ -60,6 +63,7 @@ def open_hatch():
     elif not is_hightemp():
     # Check if temperature is too low
         logger.info("Temperature is low. Hatch not opening")
+        print("Temperature is low. Hatch not opening")
     else:
 
         GPIO.setmode(GPIO.BCM)
@@ -122,6 +126,8 @@ def close_hatch():
     return
 
 def button_pushed(channel):
+    print("Button pushed")
+    logger = logging.getLogger('hatch_logger')
     logger.info("Event: Button pushed")
     
     hatch_status = get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
@@ -138,37 +144,43 @@ def button_pushed(channel):
     logger.info("End button pushed\n")
         
         
-# Main script starting here
-print("Start main script")
-logger = logging.getLogger('hatch_logger')
-logger.info("Starting logger")
-logger.info("Setting up background scheduler")
-sched = BackgroundScheduler()
-
-
-logger.info("Adding cron job")
-sched.add_job(open_hatch, 'cron', hour=9, minute=1)
-sched.add_job(close_hatch, 'cron', hour=17, minute=1)
-
-sched.print_jobs()
+def start_controller():
     
-print("Starting cron job")
-sched.start()
+    logger = logging.getLogger('hatch_logger')
+    logger.info("Starting logger")
+    logger.info("Setting up background scheduler")
+    sched = BackgroundScheduler()
 
 
-try:
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-    GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed)
+    logger.info("Adding cron job")
+    sched.add_job(open_hatch, 'cron', hour=18, minute=3)
+    sched.add_job(close_hatch, 'cron', hour=18, minute=4)
 
-    while True:
-       time.sleep(10)
-
-
-finally:
-    print("clean up")
-    GPIO.cleanup() # cleanup all GPIO
+    sched.print_jobs()
+    
+    print("Starting cron job")
+    sched.start()
 
 
-sched.shutdown()
+    try:
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+        GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed)
 
+        while True:
+            time.sleep(10)
+
+
+    finally:
+        print("clean up")
+        GPIO.cleanup() # cleanup all GPIO
+
+
+    sched.shutdown()
+
+
+# Main script starting here
+
+print("Start main script")
+if __name__ == '__main__':
+    start_controller()
