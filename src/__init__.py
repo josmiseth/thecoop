@@ -14,7 +14,13 @@ Relay channel     Wire color     RB Port     Function
     2             Dark blue      GPIO06      Plus wire hatch down
     1             Pink           GPIO21      Minus wire hatch down
 
+Push button wiring
+Wire color        RB Port
+Black             3.3 V (pin 1)
+White             GPIO23
 
+Temperature relay wiring
+Brown             GPIO18
 
 
 '''
