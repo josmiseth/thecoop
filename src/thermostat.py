@@ -21,8 +21,8 @@ def is_lowtemp():
     state = False
     try:
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(18, GPIO.IN)
-        state = GPIO.input(18)
+        GPIO.setup(22, GPIO.IN)
+        state = GPIO.input(22)
     
  
     finally:
