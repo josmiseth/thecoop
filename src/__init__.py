@@ -20,7 +20,7 @@ Black             3.3 V (pin 1)
 White             GPIO23
 
 Temperature relay wiring
-Brown             GPIO18
+Brown             GPIO22
 
 
 '''
@@ -41,7 +41,7 @@ PIN_RELAY_MINUS_UP = 17
 PIN_RELAY_PLUS_UP = 5        
 PIN_RELAY_PLUS_DOWN = 6
 PIN_RELAY_MINUS_DOWN = 21
-PIN_TEMP_RELAY = 18
+PIN_TEMP_RELAY = 22
 PIN_PUSH_BUTTON = 23
 
 
@@ -73,9 +73,6 @@ def init_logging():
 
 # Set up logging
 init_logging()
-
-print("Init package from __init__.py")
-print("\n \n MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI \n \n")
 
 
 init_status_file_folder(status_file_folder)
