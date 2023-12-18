@@ -15,6 +15,7 @@ import time
 from time import sleep
 import RPi.GPIO as GPIO
 
+from flask import Flask
 
 def set_hatch_status(status, filename):
     
@@ -50,12 +51,38 @@ def is_hightemp():
         print("Low temperature")
     return state
 
+def open_hatch_run():
+    logger = logging.getLogger('hatch_logger')
+
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(thecoop.PIN_RELAY_PLUS_UP, GPIO.OUT)
+    GPIO.setup(thecoop.PIN_RELAY_MINUS_UP, GPIO.OUT)
+
+    logger.info("Hatch in motion")
+    #Save hatch status running to file
+    set_hatch_status(thecoop.STATUS_IN_MOTION, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
+    
+    GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.LOW)
+    GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.LOW)
+
+    time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
+    
+    GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.HIGH)
+    GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.HIGH)
+
+
+    #Save hatch status open to file
+    set_hatch_status(thecoop.STATUS_OPEN, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
+    print("Hatch open\n\n")
+    logger.info("Hatch open")
+
+    return
+
 def open_hatch():
     logger = logging.getLogger('hatch_logger')
     print("Event: Open hatch")
     logger.info("Event: Open hatch")
     
-
     # First, check if hatch is open. Is , do not open
     print("Checking hatch status")
     if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
@@ -65,28 +92,7 @@ def open_hatch():
         logger.info("Temperature is low. Hatch not opening")
         print("Temperature is low. Hatch not opening")
     else:
-
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(thecoop.PIN_RELAY_PLUS_UP, GPIO.OUT)
-        GPIO.setup(thecoop.PIN_RELAY_MINUS_UP, GPIO.OUT)
-
-        logger.info("Hatch in motion")
-        #Save hatch status running to file
-        set_hatch_status(thecoop.STATUS_IN_MOTION, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
-
-        GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.LOW)
-        GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.LOW)
-
-        time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
-
-        GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.HIGH)
-        GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.HIGH)
-
-
-        #Save hatch status open to file
-        set_hatch_status(thecoop.STATUS_OPEN, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
-        print("Hatch open\n\n")
-        logger.info("Hatch open")
+        open_hatch_run()
 
     return
 
@@ -134,8 +140,12 @@ def button_pushed(channel):
     
     if GPIO.input(channel) == GPIO.HIGH:
         if hatch_status == thecoop.STATUS_CLOSED:
-            logger.info("Open hatch")
-            open_hatch()       
+            print("Checking hatch status")
+            if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
+                logger.warning("Hatch is not closed, not proceding with opening hatch")
+            else:
+                logger.info("Open hatch")
+                open_hatch_run()       
         elif hatch_status == thecoop.STATUS_OPEN:
             logger.info("Close hatch")
             close_hatch()
@@ -153,8 +163,8 @@ def start_controller():
 
 
     logger.info("Adding cron job")
-    sched.add_job(open_hatch, 'cron', hour=18, minute=3)
-    sched.add_job(close_hatch, 'cron', hour=18, minute=4)
+    sched.add_job(open_hatch, 'cron', hour=6, minute=55)
+    sched.add_job(close_hatch, 'cron', hour=6, minute=56)
 
     sched.print_jobs()
     
@@ -181,6 +191,11 @@ def start_controller():
 
 # Main script starting here
 
-print("Start main script")
 if __name__ == '__main__':
+    print("Start main script")
+
+    print("Init package from __init__.py")
+    print("\n \n MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI \n \n")
+
+
     start_controller()
