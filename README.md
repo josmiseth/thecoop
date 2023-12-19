@@ -2,6 +2,15 @@
 
 This is a Raspberry Pi project for making a smart chicken coop. The first goal is to be able to open and close the hatch door in an automated way. This involves controlling an electric motor with four relays, and activate this based on the time of day and outside temperature. The hatch should go up in the mornig and close in the evening. However, when it is freezing cold outside, the hatch should stay closed. When the temperature increases to a set value, the hatch should open.
 
+# Setup
+Follow the following instructions to set up the system:
+## Download the newest Raspian 64 bit image to a SD card
+## Insert the SD card to the Raspberry Pi and startup
+## Run sudo apt-get update
+## Run sudo apt-get upgrade
+## Run ssh-keygen to create ssh keys
+## Add the public key to the Github repository
+
 # GPIO pinout for Raspberry Pi 3 B+
 
 ![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins_2.jpeg "GPIO pinout")
