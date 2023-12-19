@@ -13,6 +13,7 @@ Follow the following instructions to set up the system:
 1. Make a projects folder
 1. Copy the clone ssh statement from Github: git@github.com:josmiseth/thecoop.git
 1. Clone the respository on to the projects folder: git clone git@github.com:josmiseth/thecoop.git
+1. Install emacs: sudo apt-get install emacs
 1. Install Apscheduler (for all users including admin) with: sudo apt install python3-apscheduler
 
 # GPIO pinout for Raspberry Pi 3 B+
