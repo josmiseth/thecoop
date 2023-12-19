@@ -10,6 +10,9 @@ Follow the following instructions to set up the system:
 1. Run sudo apt-get upgrade
 1. Run ssh-keygen to create ssh keys
 1. Add the public key to the Github repository https://github.com/settings/keys
+1. Make a projects folder
+1. 
+1. Install Apscheduler (for all users including admin) with: sudo apt install python3-apscheduler
 
 # GPIO pinout for Raspberry Pi 3 B+
 
