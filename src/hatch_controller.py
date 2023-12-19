@@ -4,7 +4,7 @@ import time
 import os
 import sys
 import logging
-sys.path.append('/home/pi/projects/thecoop/')
+sys.path.append('/home/josmi/projects/thecoop/')
 
 
 from apscheduler.schedulers.background import BackgroundScheduler
