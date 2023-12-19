@@ -4,12 +4,12 @@ This is a Raspberry Pi project for making a smart chicken coop. The first goal i
 
 # Setup
 Follow the following instructions to set up the system:
-## Download the newest Raspian 64 bit image to a SD card
-## Insert the SD card to the Raspberry Pi and startup
-## Run sudo apt-get update
-## Run sudo apt-get upgrade
-## Run ssh-keygen to create ssh keys
-## Add the public key to the Github repository
+1. Download the newest Raspian 64 bit image to a SD card
+1. Insert the SD card to the Raspberry Pi and startup
+1. Run sudo apt-get update
+1. Run sudo apt-get upgrade
+1. Run ssh-keygen to create ssh keys
+1. Add the public key to the Github repository
 
 # GPIO pinout for Raspberry Pi 3 B+
 
