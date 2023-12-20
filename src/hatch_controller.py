@@ -163,8 +163,8 @@ def start_controller():
 
 
     logger.info("Adding cron job")
-    sched.add_job(open_hatch, 'cron', hour=21, minute=23)
-    sched.add_job(close_hatch, 'cron', hour=21, minute=24)
+    sched.add_job(open_hatch, 'cron', hour=21, minute=25)
+    sched.add_job(close_hatch, 'cron', hour=21, minute=26)
 
     sched.print_jobs()
     
