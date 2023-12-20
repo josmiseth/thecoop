@@ -31,6 +31,11 @@ import logging
 status_file_folder = "/tmp/thecoop"
 status_file_name = "hatch_status.txt"
 
+OPEN_HATCH_HOUR = 21
+OPEN_HATCH_MINUTE = 40
+CLOSE_HATCH_HOUR = 21
+CLOSE_HATCH_MINUTE = 41
+
 STATUS_CLOSED = '0'
 STATUS_OPEN = '1'
 STATUS_IN_MOTION = '2'
