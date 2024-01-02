@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 import time
+import datetime
+from suntime import Sun, SunTimeException
+import calendar
+
 import os
 import sys
 import logging
@@ -158,17 +162,34 @@ def start_controller():
     
     logger = logging.getLogger('hatch_logger')
     logger.info("Starting logger")
+
+    logger.info("Setting up sun with local coordinates")
+    sun = Sun(thecoop.LATITUDE, thecoop.LONGITUDE)
+
     logger.info("Setting up background scheduler")
     sched = BackgroundScheduler()
 
 
-    logger.info("Adding cron job")
+    logger.info("Adding open hatch cron job")
     sched.add_job(open_hatch, 'cron', hour=thecoop.OPEN_HATCH_HOUR, minute=thecoop.OPEN_HATCH_MINUTE)
-    sched.add_job(close_hatch, 'cron', hour=thecoop.CLOSE_HATCH_HOUR, minute=thecoop.CLOSE_HATCH_TIME_TO_RUN)
+
+    logger.info("Setting up close hatch cron jobs for each day 1 hour after sunset")
+    #Setting up dates times for sunset for all days in a leap year (2024)
+    for month in range(1,13):
+        for day in range(1,calendar.monthrange(2024, month)[1]+1):
+            date = datetime.date(2024, month, day)
+            sunset = sun.get_local_sunset_time(date)
+            sunset_plus_one_hour = sunset + datetime.timedelta(hours=1)
+            hour = sunset_plus_one_hour.strftime('%H')
+            minute = sunset_plus_one_hour.strftime('%M')
+
+            sched.add_job(close_hatch, 'cron', month=month, day=day, hour=hour, minute=minute)
+
+    #sched.add_job(close_hatch, 'cron', hour=thecoop.CLOSE_HATCH_HOUR, minute=thecoop.CLOSE_HATCH_TIME_TO_RUN)
 
     sched.print_jobs()
     
-    print("Starting cron job")
+    logger.info("Starting cron job")
     sched.start()
 
 
