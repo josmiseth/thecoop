@@ -22,6 +22,10 @@ longitude = 10.421906
 
 sun = Sun(latitude, longitude)
 
+today = datetime.date.today()
+year = today.year
+print(year)
+
 print("Adding cron job")
 sched = BackgroundScheduler()
 sched.add_job(open_hatch, 'cron', hour=9, minute=0)

@@ -173,11 +173,15 @@ def start_controller():
     logger.info("Adding open hatch cron job")
     sched.add_job(open_hatch, 'cron', hour=thecoop.OPEN_HATCH_HOUR, minute=thecoop.OPEN_HATCH_MINUTE)
 
+    logger.info("Get current year to set up cron schedule")
+    today = datetime.date.today()
+    currentyear = today.year
+    
     logger.info("Setting up close hatch cron jobs for each day 1 hour after sunset")
     #Setting up dates times for sunset for all days in a leap year (2024)
     for month in range(1,13):
-        for day in range(1,calendar.monthrange(2024, month)[1]+1):
-            date = datetime.date(2024, month, day)
+        for day in range(1,calendar.monthrange(currentyear, month)[1]+1):
+            date = datetime.date(currentyear, month, day)
             sunset = sun.get_local_sunset_time(date)
             sunset_plus_one_hour = sunset + datetime.timedelta(hours=1)
             hour = sunset_plus_one_hour.strftime('%H')
