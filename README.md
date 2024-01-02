@@ -15,6 +15,7 @@ Follow the following instructions to set up the system:
 1. Clone the respository on to the projects folder: git clone git@github.com:josmiseth/thecoop.git
 1. Install emacs: sudo apt-get install emacs
 1. Install Apscheduler (for all users including admin) with: sudo apt install python3-apscheduler
+1. Install Suntime with: sudo apt install python3-suntime
 1. Run ~/projects/thecoop/src/hatch_controller.py
 
 # GPIO pinout for Raspberry Pi 3 B+
