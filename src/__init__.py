@@ -31,8 +31,8 @@ import logging
 status_file_folder = "/tmp/thecoop"
 status_file_name = "hatch_status.txt"
 
-OPEN_HATCH_HOUR = 21
-OPEN_HATCH_MINUTE = 40
+OPEN_HATCH_HOUR = 9
+OPEN_HATCH_MINUTE = 0
 CLOSE_HATCH_HOUR = 21
 CLOSE_HATCH_MINUTE = 41
 
@@ -48,6 +48,10 @@ PIN_RELAY_PLUS_DOWN = 6
 PIN_RELAY_MINUS_DOWN = 21
 PIN_TEMP_RELAY = 22
 PIN_PUSH_BUTTON = 23
+
+LATITUDE = 63.446827
+LONGITUDE = 10.421906
+
 
 
 def set_hatch_status(status, filename):
