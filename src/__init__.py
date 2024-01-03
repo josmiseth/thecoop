@@ -52,7 +52,7 @@ PIN_PUSH_BUTTON = 23
 LATITUDE = 63.446827
 LONGITUDE = 10.421906
 
-
+MINIMUM_TEMP = 4    # Degrees celcius
 
 def set_hatch_status(status, filename):
     
