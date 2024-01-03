@@ -10,6 +10,7 @@ import sys
 import logging
 sys.path.append('/home/josmi/projects/thecoop/')
 
+import requests
 
 from apscheduler.schedulers.background import BackgroundScheduler
 import src as thecoop
@@ -44,6 +45,8 @@ def is_hightemp():
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(thecoop.PIN_TEMP_RELAY, GPIO.IN)
         state = GPIO.input(thecoop.PIN_TEMP_RELAY)
+        logger.info("Temperature pin state: ")
+        logger.info(state)
     finally:
         print("")
         
@@ -51,8 +54,37 @@ def is_hightemp():
         logger.info("Temperature is above set minimum temperature")
         print("High temperature")
     else:
-        logger.info("Temperature is below set minimum temperature")
-        print("Low temperature")
+        logger.info("Relay indicating temperature below set minimum temperature")
+        print("Relay indicating low temperature")
+
+        print("Checking weatherforecast in case of failed temperature measurement")
+        logger.info("Checking weatherforecast in case of failed temperature measurement")
+
+        latitude = thecoop.LATITUDE
+        longitude = thecoop.LONGITUDE
+
+        url =  'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=%1.4f&lon=%1.4f' % (latitude, longitude)
+
+
+        headers = {
+            'User-Agent': 'theCoop github.com/josmiseth/thecoop.git',
+        }
+
+        #TODO: add try here
+        
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            met_data = response.json()
+            instant_temperature = met_data["properties"]["timeseries"][0]["data"]["instant"]["details"]["air_temperature"]
+            logger.info("Met weatherforecast instant temperature %1.2f less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
+            print("Met weatherforecast instant temperature %1.2f less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
+
+            if instant_temperature <= thecoop.MINIMUM_TEMP:
+                state = False
+            else:
+                state = True
+        
     return state
 
 def open_hatch_run():
@@ -148,8 +180,8 @@ def button_pushed(channel):
             if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
                 logger.warning("Hatch is not closed, not proceding with opening hatch")
             else:
-                logger.info("Open hatch")
-                open_hatch_run()       
+                logger.info("Open hatch")              
+                open_hatch_run()        
         elif hatch_status == thecoop.STATUS_OPEN:
             logger.info("Close hatch")
             close_hatch()
