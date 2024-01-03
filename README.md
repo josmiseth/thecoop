@@ -1,6 +1,19 @@
 # thecoop
 
-This is a Raspberry Pi project for making a smart chicken coop. The first goal is to be able to open and close the hatch door in an automated way. This involves controlling an electric motor with four relays, and activate this based on the time of day and outside temperature. The hatch should go up in the mornig and close in the evening. However, when it is freezing cold outside, the hatch should stay closed. When the temperature increases to a set value, the hatch should open.
+This is a Raspberry Pi project for making a smart chicken coop. The first goal is to be able to open and close the hatch door in an automated way. This involves controlling an electric motor with four relays, and activate this based on the time of day and outside temperature. The hatch should go up in the morning and close in the evening. However, when it is freezing cold outside, the hatch should stay closed. When the temperature increases to a set value, the hatch should open.
+
+![Exterior](https://github.com/josmiseth/thecoop/blob/main/img/Exterior.jpeg "Exterior")
+![Inner workings](https://github.com/josmiseth/thecoop/blob/main/img/Setup.jpeg "Inner workings")
+
+The system consists of
+- A Raspberry Pi 3 connected via WiFi with a 5.1 V 3 A power supply 
+- A quadruple relay for to control the up and down power for the hatch motor
+- A separate power 10-24 V power for the hatch motor
+- A 18 V drill
+- A temperature measurement unit with a relay which switches when the measured temperature is below a specified limit
+- A push button unit with a pull-up resistor for controlling the hatch motor
+
+The hatch of the chicken coop is set to open at a specified time (09:00) with cron schedule. However, if the temperature is lower than the specified temperature limit of the temperature measurement unit, the hatch will not open. A backup solution if the temperature measurement unit drops out for some reason is that Raspberry Pi calls the yr.no met API to check for the current temperature forecast, and checks if this is below a specified limit. The hatch opens one hour after sunset each day. The chickens have returned to the coop long before that.  The scheduling of this is handled through cron by sepeate jobs for each day of the year as specified times determined by the Suntime Python package. The hatch can be controlled via the push button as well. When the button is pushed, the door opens or closes independent of outdoor temperature. 
 
 # Setup
 Follow the following instructions to set up the system:
