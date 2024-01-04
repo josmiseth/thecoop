@@ -32,6 +32,10 @@ client.loop_start()
 client.subscribe("pt:j1/#")
 
 #client.subscribe("pt:j1/mt:evt/rt:ad/rn:zigbee/ad:1")
+
+#Outdoor thermometer:
+client.subscribe("pt:j1/mt:evt/rt:dev/rn:zigbee/ad:1/sv:sensor_temp/ad:5_1")
+
 while True:
     time.sleep(10)
 #time.sleep(10)
