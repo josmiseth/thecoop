@@ -7,13 +7,13 @@ This is a Raspberry Pi project for making a smart chicken coop. The first goal i
 
 The system consists of
 - A Raspberry Pi 3 connected via WiFi with a 5.1 V 3 A power supply 
-- A quadruple relay for to control the up and down power for the hatch motor
+- A quadruple relay to control the motor to move the hatch up and down
 - A separate power 10-24 V power for the hatch motor
 - A 18 V drill
 - A temperature measurement unit with a relay which switches when the measured temperature is below a specified limit
 - A push button unit with a pull-up resistor for controlling the hatch motor
 
-The hatch of the chicken coop is set to open at a specified time (09:00) with cron schedule. However, if the temperature is lower than the specified temperature limit of the temperature measurement unit, the hatch will not open. A backup solution if the temperature measurement unit drops out for some reason is that Raspberry Pi calls the yr.no met API to check for the current temperature forecast, and checks if this is below a specified limit. The hatch opens one hour after sunset each day. The chickens have returned to the coop long before that.  The scheduling of this is handled through cron by sepeate jobs for each day of the year as specified times determined by the Suntime Python package. The hatch can be controlled via the push button as well. When the button is pushed, the door opens or closes independent of outdoor temperature. 
+The hatch of the chicken coop is set to open at a specified time (09:00) with cron schedule. However, if the temperature is lower than the specified temperature limit of the temperature measurement unit, the hatch will not open. A backup solution if the temperature measurement unit drops out for some reason is that Raspberry Pi calls the yr.no met API to check for the current temperature forecast, and checks if this is below a specified limit. The hatch opens one hour after sunset each day. The chickens have returned to the coop long before that.  The scheduling of this is handled through cron by sepeate jobs for each day of the year at specified times determined by the Suntime Python package. The hatch can be controlled via the push button as well. When the button is pushed, the door opens or closes independent of outdoor temperature. 
 
 # Setup
 Follow the following instructions to set up the system:
@@ -36,6 +36,27 @@ Follow the following instructions to set up the system:
 ![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins_2.jpeg "GPIO pinout")
 
 ![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins.jpeg "GPIO pinout")
+
+Relay wiring
+
+|Relay channel  |   Wire color  |   Port  |   Function
+|---------------|---------------|------------|-------------------
+|    4          |   Yellow      |   GPIO17   |   Minus wire hatch up
+|    3          |   Green       |   GPIO05   |   Plus wire hatch up
+|    2          |   Dark blue   |   GPIO06   |   Plus wire hatch down
+|    1          |   Pink        |   GPIO21   |   Minus wire hatch down
+
+Push button wiring
+|Wire color    |    Port
+|--------------|------------------
+|Black         |    3.3 V (pin 1)
+|White         |    GPIO23
+
+
+Temperature relay wiring
+|Wire color   | Port
+|-------------|---------
+|Brown        | GPIO22
 
 
 # Relay setup
@@ -110,4 +131,13 @@ https://www.javatpoint.com/apschedular-python-example
 
 Crontab tips:
 https://crontab.guru/every-1-minute
+
+Locationforecast API:
+https://api.met.no/weatherapi/locationforecast/2.0/documentation
+
+Connection with Futurehome over MQTT:
+https://support.futurehome.no/hc/en-no/articles/360033256491-Local-API-access-over-MQTT-Beta-
+
+How to use the Paho Python MQTT client:
+http://www.steves-internet-guide.com/into-mqtt-python-client/
 
