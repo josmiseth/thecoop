@@ -77,12 +77,16 @@ def is_hightemp():
         if response.status_code == 200:
             met_data = response.json()
             instant_temperature = met_data["properties"]["timeseries"][0]["data"]["instant"]["details"]["air_temperature"]
-            logger.info("Met weatherforecast instant temperature %1.2f less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
-            print("Met weatherforecast instant temperature %1.2f less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
-
+            
             if instant_temperature <= thecoop.MINIMUM_TEMP:
                 state = False
+                logger.info("Met weatherforecast instant temperature %1.2f is less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
+                print("Met weatherforecast instant temperature %1.2f is less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
+
             else:
+                logger.info("Met weatherforecast instant temperature %1.2f higher than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
+                print("Met weatherforecast instant temperature %1.2f higher than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
+
                 state = True
         
     return state
