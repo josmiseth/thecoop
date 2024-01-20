@@ -29,7 +29,10 @@ Follow the following instructions to set up the system:
 1. Install emacs: sudo apt-get install emacs
 1. Install Apscheduler (for all users including admin) with: sudo apt install python3-apscheduler
 1. Install Suntime with: sudo apt install python3-suntime
-1. Run ~/projects/thecoop/src/hatch_controller.py
+1. Run: python3 ~/projects/thecoop/src/hatch_controller.py
+1. Log on a terminal via ssh
+1. Run: nohup python3 ~/projects/thecoop/src/hatch_controller.py &
+1. Terminate terminal, and the process will continue to run.
 
 # GPIO pinout for Raspberry Pi 3 B+
 
