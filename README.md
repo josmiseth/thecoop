@@ -34,6 +34,24 @@ Follow the following instructions to set up the system:
 1. Run: nohup python3 ~/projects/thecoop/src/hatch_controller.py &
 1. Terminate terminal, and the process will continue to run.
 
+# Launch on reboot
+
+Use the following setup to launch from reboot. It should be mentioned that with the current setup, this requires that the hatch is in position down when the Raspberry Pi is rebooted, for instance after an electriciy outage. However, as I am using a modified battery power drill with a torque limiter. If the hatch is in an open position when the Pi reboots and the hatch is commanded to open, the hatch is physicall stopped to not move furthern up than the open position, and the torque limiter will make the power drill run as long as it is set to run. This syncronises the open status in the status file with the actual status of the hatch. If such the hatch would not be set up like this, a limit switch could be added to measure the physical status of the hatch upon reboot, and a syncronization of the digital status and the physical status could be ensured.
+
+1. Go to the bin folder cd ~/projects/thecoop/bin
+1. Make the launcher.sh scrip executable with the command: chmod 755 launcher.sh
+1. Make a folder called ~/projects/thecoop/logs
+1. Change the crontab by typing: sudo crontab -e
+1. Select your favorite text editor if this is prompted for
+1. At the bottom of the crontab file enter the line: @reboot sleep 60 && sh /home/pi/thecoop/bin/launcher.sh >/home/pi/thecoop/logs/cronlog 2>&1
+1. Make sure that that the paths in the crontab file line are corresponding to the ones you have on your Pi
+1. Save the crontab file
+
+You can test this by typing "sudo reboot" and wait for the reboot (and for the 60 second sleep). Check that the cronlog file is in the logs directory by typing "cat cronlog".
+
+
+Got inspiration from: https://www.instructables.com/Raspberry-Pi-Launch-Python-script-on-startup/
+
 # GPIO pinout for Raspberry Pi 3 B+
 
 ![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins_2.jpeg "GPIO pinout")
