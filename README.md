@@ -86,6 +86,13 @@ Test code: https://github.com/josmiseth/thecoop/blob/main/test/scripts/relay.py
 
 ![Setup for relay](https://github.com/josmiseth/thecoop/blob/main/img/relay_wiring_complete.jpeg "Relay wiring overview")
 
+# Webserver and water level measurement
+
+https://helloworld.co.in/article/smart-water-tank
+
+Install Ubuntu through an USB memory stick: 
+https://gcore.com/learning/how-to-install-ubuntu-on-windows/
+
 
 # Temperature sensor setup
 
