@@ -110,6 +110,10 @@ https://raspberrypi.stackexchange.com/questions/5083/read-input-from-the-gpio
 https://grantwinney.com/using-pullup-and-pulldown-resistors-on-the-raspberry-pi/
         
 
+# Ultrasound sensor for water level measurement
+
+https://helloworld.co.in/article/smart-water-tank
+
 # Hall sensor
 
 https://learn.sunfounder.com/lesson-1-hall-sensor/
