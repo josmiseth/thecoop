@@ -92,7 +92,7 @@ https://helloworld.co.in/article/smart-water-tank
 
 Install Ubuntu through an USB memory stick: 
 https://gcore.com/learning/how-to-install-ubuntu-on-windows/
-
+using UNetBootin: https://unetbootin.github.io/
 
 # Temperature sensor setup
 
