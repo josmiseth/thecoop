@@ -94,6 +94,13 @@ Install Ubuntu through an USB memory stick:
 https://gcore.com/learning/how-to-install-ubuntu-on-windows/
 using UNetBootin: https://unetbootin.github.io/
 
+Follow instructions to set up the webserver and mySQL
+ 
+Start the Xampp panel with: sudo /opt/lampp/manager-linux-x64.run
+
+
+Install code on Raspberry Pi
+
 # Temperature sensor setup
 
 https://www.circuitbasics.com/raspberry-pi-ds18b20-temperature-sensor-tutorial/
