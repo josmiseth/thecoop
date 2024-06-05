@@ -26,6 +26,13 @@ def set_hatch_status(status, filename):
     
     with open(filename, 'w') as file:
         file.write(status)
+
+    logging.info("Status file written: %s" % status)
+    url_remote="http://10.0.0.54:8080/water-tank/insert_hatch_data.php?status=" + str(status)
+    cmd="curl -s " + url_remote
+    result=os.popen(cmd).read()
+    logging.info(cmd)
+
     return
 
 
@@ -257,6 +264,5 @@ if __name__ == '__main__':
 
     print("Init package from __init__.py")
     print("\n \n MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI \n \n")
-
 
     start_controller()
