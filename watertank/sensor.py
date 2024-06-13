@@ -1,6 +1,7 @@
 
 #Project: Smart Water Tank
 #Created by: Jitesh Saini
+#Modified by: Jo Smiseth
 
 #you can use the setup_cron.sh bash script to install a cron job to automatically execute this file every minute.
 
@@ -8,10 +9,11 @@ import RPi.GPIO as GPIO
 import time,os
 
 import datetime
+from gpiozero import Buzzer
 
-TRIG = 4 #23
+TRIG = 4
 ECHO = 24
-ALARM = 5
+ALARM = 27
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -20,8 +22,9 @@ GPIO.setup(TRIG,GPIO.OUT)
 GPIO.setup(ECHO,GPIO.IN)
 GPIO.output(TRIG, False)
 
-GPIO.setup(ALARM,GPIO.OUT)
-GPIO.output(ALARM, True)
+#GPIO.setup(ALARM,GPIO.OUT)
+#GPIO.output(ALARM, True)
+buzzer = Buzzer(ALARM)
 
 print ("Waiting For Sensor To Settle")
 time.sleep(1) #settling time 
@@ -73,10 +76,13 @@ def low_level_warning(dist):
 	tank_height=114 #set your tank height here
 	level=tank_height-dist
 	if(level<40):
-		print("level low : ", level)
-		GPIO.output(ALARM, False)
+               print("level low : ", level)
+               for n in range(0,25):
+                      buzzer.on()
+                      time.sleep(1)
+                      buzzer.off()
+                      time.sleep(1)                      
 	else:
-		GPIO.output(ALARM, True)
 		print("level ok")
 		
 
