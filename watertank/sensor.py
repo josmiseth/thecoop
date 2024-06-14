@@ -22,9 +22,9 @@ GPIO.setup(TRIG,GPIO.OUT)
 GPIO.setup(ECHO,GPIO.IN)
 GPIO.output(TRIG, False)
 
-#GPIO.setup(ALARM,GPIO.OUT)
-#GPIO.output(ALARM, True)
-buzzer = Buzzer(ALARM)
+GPIO.setup(ALARM,GPIO.OUT)
+GPIO.output(ALARM, False)
+#buzzer = Buzzer(ALARM)
 
 print ("Waiting For Sensor To Settle")
 time.sleep(1) #settling time 
@@ -77,10 +77,13 @@ def low_level_warning(dist):
 	level=tank_height-dist
 	if(level<40):
                print("level low : ", level)
-               for n in range(0,25):
-                      buzzer.on()
+               #Tibber pushnotification
+               #mutation{sendPushNotification(input: {title: "hei", message: "testing", screenToOpen:NOTIFICATIONS})}
+
+               for n in range(0,20):
+                      GPIO.output(ALARM, True)
                       time.sleep(1)
-                      buzzer.off()
+                      GPIO.output(ALARM, False)
                       time.sleep(1)                      
 	else:
 		print("level ok")
