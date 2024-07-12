@@ -77,8 +77,6 @@ def low_level_warning(dist):
 	level=tank_height-dist
 	if(level<40):
                print("level low : ", level)
-               #Tibber pushnotification
-               #mutation{sendPushNotification(input: {title: "hei", message: "testing", screenToOpen:NOTIFICATIONS})}
 
                for n in range(0,20):
                       GPIO.output(ALARM, True)
