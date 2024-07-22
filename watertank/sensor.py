@@ -77,8 +77,6 @@ def low_level_warning(dist):
 	level=tank_height-dist
 	if(level<40):
                print("level low : ", level)
-               #Tibber pushnotification
-               #mutation{sendPushNotification(input: {title: "hei", message: "testing", screenToOpen:NOTIFICATIONS})}
 
                for n in range(0,20):
                       GPIO.output(ALARM, True)
@@ -87,10 +85,46 @@ def low_level_warning(dist):
                       time.sleep(1)                      
 	else:
 		print("level ok")
+  # Welcome to the Tibber GraphQL Explorer
+  #
+  # GraphiQL is an in-browser tool for writing, validating, and
+  # testing GraphQL queries.
+  #
+  # Type queries into this side of the screen, and you will see intelligent
+  # typeaheads aware of the current GraphQL type schema and live syntax and
+  # validation errors highlighted within the text.
+  #
+  # GraphQL queries typically start with a "{" character. Lines that start
+  # with a # are ignored.
+  #
+  # Keyboard shortcuts:
+  #
+  #  Prettify Query:  Shift-Ctrl-P (or press the prettify button above)
+  #
+  #     Merge Query:  Shift-Ctrl-M (or press start the merge button above)
+  #
+  #       Run Query:  Ctrl-Enter (or press the play button above)
+  #
+  #   Auto Complete:  Ctrl-Space (or just start typing)
+  #
 
-
-
-                
+  
+#  mutation{
+#    sendPushNotification(
+#      input:
+#      {
+#        title: "Low water level",
+#       	message:"The drinking water level in the chicken coop is low. Fill up the water tank",
+#        screenToOpen:HOME
+#      }
+#    )
+#    {
+#      successful,
+#      pushedToNumberOfDevices,
+#      __typename
+#    }
+#  }
+#		
 
 def main():
 	

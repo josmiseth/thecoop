@@ -80,6 +80,15 @@ Temperature relay wiring
 |Brown        | GPIO22
 
 
+Ultrasound distance sensor
+|Gate         |Wire color   | Port
+|-------------|-------------|---------
+|Echo         |White        | GPIO24
+|Trig	      |Purple	    | GPIO04
+|Alarm (LED)  |Brown	    | GIPO27
+
+
+
 # Relay setup
 
 Test code: https://github.com/josmiseth/thecoop/blob/main/test/scripts/relay.py

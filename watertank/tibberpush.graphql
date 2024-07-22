@@ -1,0 +1,16 @@
+
+  mutation{
+    sendPushNotification(
+      input:
+      {
+        title: "Low water level",
+       	message:"The drinking water level in the chicken coop is low. Fill up the water tank",
+        screenToOpen:HOME
+      }
+    )
+    {
+      successful,
+      pushedToNumberOfDevices,
+      __typename
+    }
+  }

@@ -22,6 +22,21 @@ import RPi.GPIO as GPIO
 
 from flask import Flask
 
+def limit_reached(pin_number):
+    
+    # print("Check if limit reached (switch pushed)")
+    
+    state = False
+    try:
+        state = not GPIO.input(pin_number)
+        # print("Pin state: ")
+        # print(state)
+    except:
+        logging.info("Error with pin when testing limit switch")
+
+    return state
+
+
 def set_hatch_status(status, filename):
     
     with open(filename, 'w') as file:
@@ -101,6 +116,9 @@ def is_hightemp():
 def open_hatch_run():
     logger = logging.getLogger('hatch_logger')
 
+    checkloops = 100
+    delta_t = thecoop.OPEN_HATCH_TIME_TO_RUN/checkloops
+
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(thecoop.PIN_RELAY_PLUS_UP, GPIO.OUT)
     GPIO.setup(thecoop.PIN_RELAY_MINUS_UP, GPIO.OUT)
@@ -112,7 +130,10 @@ def open_hatch_run():
     GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.LOW)
     GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.LOW)
 
-    time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
+    while not limit_reached(thecoop.PIN_LIMIT_UP):
+        time.sleep(delta_t)
+
+    #time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
     
     GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.HIGH)
     GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.HIGH)
@@ -147,6 +168,10 @@ def open_hatch():
 def close_hatch():
     logger = logging.getLogger('hatch_logger')
 
+    checkloops = 100
+    delta_t = thecoop.CLOSE_HATCH_TIME_TO_RUN/checkloops
+
+    
     print("Event: Close hatch")
     logger.info("Event: Close hatch")
 
@@ -166,7 +191,11 @@ def close_hatch():
         GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.LOW)
         GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.LOW)
 
-        time.sleep(thecoop.CLOSE_HATCH_TIME_TO_RUN)
+        while not limit_reached(thecoop.PIN_LIMIT_DOWN):
+            time.sleep(delta_t)
+
+        #time.sleep(thecoop.CLOSE_HATCH_TIME_TO_RUN)
+
         
         GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.HIGH)
         GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.HIGH)
@@ -243,6 +272,9 @@ def start_controller():
     try:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+        GPIO.setup(thecoop.PIN_LIMIT_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
+        GPIO.setup(thecoop.PIN_LIMIT_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
+
         GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed)
 
         while True:
