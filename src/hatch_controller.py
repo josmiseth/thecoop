@@ -24,7 +24,7 @@ from flask import Flask
 
 def limit_reached(pin_number):
     
-    # print("Check if limit reached (switch pushed)")
+    #print("Check if limit reached (switch pushed)")
     
     state = False
     try:
@@ -130,8 +130,10 @@ def open_hatch_run():
     GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.LOW)
     GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.LOW)
 
-    while not limit_reached(thecoop.PIN_LIMIT_UP):
+    timepassed = 0
+    while not limit_reached(thecoop.PIN_LIMIT_UP) and timepassed < thecoop.OPEN_HATCH_TIME_TO_RUN:
         time.sleep(delta_t)
+        timepassed = timepassed + delta_t
 
     #time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
     
@@ -191,8 +193,10 @@ def close_hatch():
         GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.LOW)
         GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.LOW)
 
-        while not limit_reached(thecoop.PIN_LIMIT_DOWN):
+        timepassed = 0
+        while not limit_reached(thecoop.PIN_LIMIT_DOWN) and timepassed < thecoop.CLOSE_HATCH_TIME_TO_RUN:
             time.sleep(delta_t)
+            timepassed = timepassed + delta_t
 
         #time.sleep(thecoop.CLOSE_HATCH_TIME_TO_RUN)
 
@@ -271,11 +275,13 @@ def start_controller():
 
     try:
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+#        GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+        GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
         GPIO.setup(thecoop.PIN_LIMIT_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
         GPIO.setup(thecoop.PIN_LIMIT_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
-
-        GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed)
+        
+        GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed, bouncetime=300)
 
         while True:
             time.sleep(10)
@@ -293,7 +299,7 @@ def start_controller():
 
 if __name__ == '__main__':
     print("Start main script")
-
+    
     print("Init package from __init__.py")
     print("\n \n MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI \n \n")
 
