@@ -86,7 +86,8 @@ Ultrasound distance sensor
 |Echo         |White        | GPIO24
 |Trig	      |Purple	    | GPIO04
 |Alarm (LED)  |Brown	    | GIPO27
-
+|Ground       |Black        | GPIOxx
+|Vcc          |Red          | GPIOxx
 
 
 # Relay setup
