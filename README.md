@@ -86,8 +86,12 @@ Ultrasound distance sensor
 |Echo         |White        | GPIO24
 |Trig	      |Purple	    | GPIO04
 |Alarm (LED)  |Brown	    | GIPO27
-|Ground       |Black        | GPIOxx
-|Vcc          |Red          | GPIOxx
+|Ground       |Black        | GND
+|Vcc          |Red          | 5V
+
+Ultrasound sensor setup:
+![Ultrasound sensor setup](https://github.com/josmiseth/thecoop/blob/main/img/IMG_2891.jpeg "Setuo")
+
 
 
 # Relay setup
