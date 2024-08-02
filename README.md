@@ -89,7 +89,7 @@ Ultrasound distance sensor
 |Ground       |Black        | GND
 |Vcc          |Red          | 5V
 
-Ultrasound sensor setup:
+Ultrasound sensor setup (pins are according to table above, not the image):
 ![Ultrasound sensor setup](https://github.com/josmiseth/thecoop/blob/main/img/IMG_2891.jpeg "Setuo")
 
 
