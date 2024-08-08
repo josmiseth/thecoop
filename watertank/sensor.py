@@ -31,7 +31,7 @@ time.sleep(1) #settling time
 print("test1")
 def get_distance():
    dist_add = 0
-
+   start_function = time.time()
    for x in range(20):
       try:
          GPIO.output(TRIG, True)
@@ -39,6 +39,9 @@ def get_distance():
          GPIO.output(TRIG, False)
          while GPIO.input(ECHO)==0:
                  pulse_start = time.time()
+                 if time.time() - start_function > 10:
+                    dist_add = -20
+                    raise Exception("No response from ultrasound unit")
          while GPIO.input(ECHO)==1:
                  pulse_end = time.time()
 
@@ -51,7 +54,7 @@ def get_distance():
          time.sleep(.1) # 100ms interval between readings
          
       except Exception as e: 
-		
+	 
          pass
 
    avg_dist=dist_add/20
