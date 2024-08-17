@@ -70,7 +70,7 @@ Relay wiring
 Push button wiring
 |Wire color    |    Port
 |--------------|------------------
-|Black         |    3.3 V (pin 1)
+|Black         |    Ground
 |White         |    GPIO23
 
 
@@ -83,7 +83,7 @@ Temperature relay wiring
 Ultrasound distance sensor
 |Gate         |Wire color   | Port
 |-------------|-------------|---------
-|Echo         |White        | GPIO24
+|Echo         |Yellow       | GPIO24
 |Trig	      |Purple	    | GPIO04
 |Alarm (LED)  |Brown	    | GIPO27
 
