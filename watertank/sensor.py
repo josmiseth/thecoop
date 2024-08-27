@@ -41,6 +41,7 @@ def get_distance():
                  pulse_start = time.time()
                  if time.time() - start_function > 10:
                     dist_add = -20
+                    print("Raise exception")
                     raise Exception("No response from ultrasound unit")
          while GPIO.input(ECHO)==1:
                  pulse_end = time.time()
@@ -55,9 +56,9 @@ def get_distance():
          
       except Exception as e: 
 	 
-         pass
+         raise Exception(e)
 
-   avg_dist=dist_add/20
+   Avg_dist=dist_add/20
    dist=round(avg_dist,3)
 
 
@@ -130,13 +131,18 @@ def low_level_warning(dist):
 #		
 
 def main():
+   try:
+      distance=get_distance()
+      print ("distance: ", distance)
+      sendData_to_remoteServer(distance)
+      low_level_warning(distance)
+      print ("---------------------")
+
+   except Exception as e: 
+	   print("Measurement failed with exception: %s" % e)
+      
+        
 	
-	distance=get_distance()
-	
-	print ("distance: ", distance)
-	sendData_to_remoteServer(distance)
-	low_level_warning(distance)
-	print ("---------------------")
 	
 	
 if __name__ == '__main__':
