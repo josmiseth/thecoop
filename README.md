@@ -58,7 +58,7 @@ Got inspiration from: https://www.instructables.com/Raspberry-Pi-Launch-Python-s
 
 ![GPIO pinout](https://github.com/josmiseth/thecoop/blob/main/img/raspberry_pi_3b%2B_pins.jpeg "GPIO pinout")
 
-Relay wiring
+Hatch relay wiring and ports
 
 |Relay channel  |   Wire color  |   Port  |   Function
 |---------------|---------------|------------|-------------------
@@ -66,6 +66,17 @@ Relay wiring
 |    3          |   Green       |   GPIO05   |   Plus wire hatch up
 |    2          |   Dark blue   |   GPIO06   |   Plus wire hatch down
 |    1          |   Pink        |   GPIO21   |   Minus wire hatch down
+
+
+
+
+Hatch limit switch ports
+
+| Limit switch  |   Wire color  |   Port  |   Function
+|---------------|---------------|------------|-------------------
+|    Up          |   TBD       |   GPIO16   |   Stop motor when hatch reaches maximum opening
+|    Down        |   TBD       |   GPIO20   |   Stop motor when hatch is completely closed
+
 
 Push button wiring
 |Wire color    |    Port
