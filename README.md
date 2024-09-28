@@ -103,7 +103,9 @@ Ultrasound distance sensor
 Ultrasound sensor setup (pins are according to table above, not the image):
 ![Ultrasound sensor setup](https://github.com/josmiseth/thecoop/blob/main/img/IMG_2891.jpeg "Setuo")
 
+# The coop web application
 
+https://github.com/jiteshsaini/Smart-Water-Tank
 
 # Relay setup
 
