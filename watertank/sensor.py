@@ -58,7 +58,7 @@ def get_distance():
 	 
          raise Exception(e)
 
-   Avg_dist=dist_add/20
+   avg_dist=dist_add/20
    dist=round(avg_dist,3)
 
 
