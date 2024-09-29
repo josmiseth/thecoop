@@ -180,9 +180,10 @@ def close_hatch():
     # First, check if hatch is closed. Is , do not close
     print("Checking hatch status")
     if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_OPEN:
-        logger.warning("Hatch is not open, not proceding with closing hatch")
+        logger.warning("Hatch is already closed, not proceding with closing hatch")
+        print("Hatch is already closed, not proceding with closing hatch")
     else:
-    
+        print("Closing hatch")
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.OUT)
         GPIO.setup(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.OUT)
@@ -197,6 +198,7 @@ def close_hatch():
         while not limit_reached(thecoop.PIN_LIMIT_DOWN) and timepassed < thecoop.CLOSE_HATCH_TIME_TO_RUN:
             time.sleep(delta_t)
             timepassed = timepassed + delta_t
+            print("Closing hatch")
 
         #time.sleep(thecoop.CLOSE_HATCH_TIME_TO_RUN)
 
