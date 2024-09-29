@@ -115,18 +115,9 @@ Test code: https://github.com/josmiseth/thecoop/blob/main/test/scripts/relay.py
 
 # Webserver and water level measurement
 
-https://helloworld.co.in/article/smart-water-tank
+The coop monitoring system and web page is found in a different repository:
+https://github.com/josmiseth/the-coop-webpage
 
-Install Ubuntu through an USB memory stick: 
-https://gcore.com/learning/how-to-install-ubuntu-on-windows/
-using UNetBootin: https://unetbootin.github.io/
-
-Follow instructions to set up the webserver and mySQL
- 
-Start the Xampp panel with: sudo /opt/lampp/manager-linux-x64.run
-
-
-Install code on Raspberry Pi
 
 # Temperature sensor setup
 
