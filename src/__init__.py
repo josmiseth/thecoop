@@ -27,6 +27,10 @@ Brown             GPIO22
 
 import os
 import logging
+from src.hatch_controller import limit_reached
+
+import RPi.GPIO as GPIO
+import time
 
 status_file_folder = "/tmp/thecoop"
 status_file_name = "hatch_status.txt"
@@ -60,8 +64,23 @@ LONGITUDE = 10.421906
 
 MINIMUM_TEMP = 4    # Degrees celcius
 
-def set_hatch_status(status, filename):
-    
+def set_hatch_status(filename):
+
+    logger = logging.getLogger('hatch_logger')
+
+    if (limit_reached(PIN_LIMIT_UP)):
+        status = STATUS_OPEN
+    elif(limit_reached(PIN_LIMIT_DOWN)):
+        status = STATUS_CLOSED
+    else:
+        print("Hatch position indecisive. Move to position fully open or fully closed")
+        logger.error("Hatch position indecisive. Move to position fully open or fully closed")
+        while True:
+            GPIO.output(PIN_RED_LED, GPIO.HIGH)  # Turn LED on
+            time.sleep(1)  # Keep it on for 1 second
+            GPIO.output(PIN_RED_LED, GPIO.LOW)   # Turn LED off
+            time.sleep(1)  # Keep it off for 1 second
+
     with open(filename, 'w') as file:
         file.write(status)
     return
@@ -86,11 +105,30 @@ def init_logging():
 
     return
 
+
+def init_pins():
+    # Define the Pi pin numbering system
+    GPIO.setmode(GPIO.BCM) 
+
+    # set up internal pull resistors
+    GPIO.setup(PIN_LIMIT_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(PIN_LIMIT_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    # Set the red red pin as an output
+    GPIO.setup(PIN_RED_LED, GPIO.OUT)
+
+    return
+
 # Set up logging
 init_logging()
 
 
 init_status_file_folder(status_file_folder)
 
+# Initialize pins
+init_pins()
+
+
 #Create status text file
-set_hatch_status(STATUS_CLOSED, os.path.join(status_file_folder, status_file_name))
+#set_hatch_status(STATUS_CLOSED, os.path.join(status_file_folder, status_file_name))
+set_hatch_status(os.path.join(status_file_folder, status_file_name))
