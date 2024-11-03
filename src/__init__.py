@@ -84,6 +84,9 @@ class HatchGPIO:
         self.pi.set_pull_up_down(PIN_LIMIT_DOWN, pigpio.PUD_UP)
         self.pi.set_pull_up_down(PIN_PUSH_BUTTON, pigpio.PUD_UP)
 
+        # Set a debounce filter 
+        pi.set_glitch_filter(PIN_PUSH_BUTTON, 20000)  # 20 ms debounce
+
     def write_pin(self, pin, state):
         self.pi.write(pin, state)
 
