@@ -2,332 +2,163 @@
 
 import time
 import datetime
-from suntime import Sun, SunTimeException
+from suntime import Sun
 import calendar
-
 import os
 import sys
 import logging
 sys.path.append('/home/josmi/projects/thecoop/')
 
 import requests
-
 import threading
-
 from apscheduler.schedulers.background import BackgroundScheduler
 import src as thecoop
-
-
-import time
-from time import sleep
-import RPi.GPIO as GPIO
-
 from flask import Flask
+import pigpio
 
-def limit_reached(pin_number):
-    
-    #print("Check if limit reached (switch pushed)")
-    
-    state = False
+def limit_reached(pi, pin_number):
     try:
-        state = not GPIO.input(pin_number)
-        # print("Pin state: ")
-        # print(state)
-    except:
-        logging.info("Error with pin when testing limit switch")
-
+        state = not pi.read(pin_number)
+    except Exception as e:
+        logging.info(f"Error with pin when testing limit switch: {e}")
+        state = False
     return state
 
-
 def set_hatch_status(status, filename):
-    
     with open(filename, 'w') as file:
         file.write(status)
-
-    logging.info("Status file written: %s" % status)
-    url_remote="http://10.0.0.54:8080/water-tank/insert_hatch_data.php?status=" + str(status)
-    cmd="curl -s " + url_remote
-    result=os.popen(cmd).read()
+    logging.info(f"Status file written: {status}")
+    url_remote = f"http://10.0.0.54:8080/water-tank/insert_hatch_data.php?status={status}"
+    cmd = f"curl -s {url_remote}"
+    result = os.popen(cmd).read()
     logging.info(cmd)
 
-    return
-
-
 def get_hatch_status(filename):
-    
     with open(filename, 'r') as file:
         status = file.read()    
     return status
 
-def is_hightemp():
+def is_hightemp(pi):
     logger = logging.getLogger('hatch_logger')
-    logger.info("probing temperature")
-    print("Probing temperature")
+    logger.info("Probing temperature")
     
-    state = False
     try:
-        GPIO.setup(thecoop.PIN_TEMP_RELAY, GPIO.IN)
-        state = GPIO.input(thecoop.PIN_TEMP_RELAY)
-        logger.info("Temperature pin state: ")
-        logger.info(state)
-    finally:
-        print("")
-        
-    if state:
-        logger.info("Temperature is above set minimum temperature")
-        print("High temperature")
-    else:
-        logger.info("Relay indicating temperature below set minimum temperature")
-        print("Relay indicating low temperature")
+        state = pi.read(thecoop.PIN_TEMP_RELAY)
+        logger.info(f"Temperature pin state: {state}")
+    except Exception as e:
+        logger.error(f"Temperature check failed: {e}")
+        state = False
 
-        print("Checking weatherforecast in case of failed temperature measurement")
-        logger.info("Checking weatherforecast in case of failed temperature measurement")
-
-        latitude = thecoop.LATITUDE
-        longitude = thecoop.LONGITUDE
-
-        url =  'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=%1.4f&lon=%1.4f' % (latitude, longitude)
-
-
-        headers = {
-            'User-Agent': 'theCoop github.com/josmiseth/thecoop.git',
-        }
-
-        #TODO: add try here
+    if not state:
+        latitude, longitude = thecoop.LATITUDE, thecoop.LONGITUDE
+        url = f'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}'
+        headers = {'User-Agent': 'theCoop github.com/josmiseth/thecoop.git'}
         
         response = requests.get(url, headers=headers)
-
         if response.status_code == 200:
             met_data = response.json()
             instant_temperature = met_data["properties"]["timeseries"][0]["data"]["instant"]["details"]["air_temperature"]
-            
-            if instant_temperature <= thecoop.MINIMUM_TEMP:
-                state = False
-                logger.info("Met weatherforecast instant temperature %1.2f is less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
-                print("Met weatherforecast instant temperature %1.2f is less than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
-
-            else:
-                logger.info("Met weatherforecast instant temperature %1.2f higher than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
-                print("Met weatherforecast instant temperature %1.2f higher than minimum temp %1.2f" % (instant_temperature, thecoop.MINIMUM_TEMP))
-
-                state = True
-        
+            state = instant_temperature > thecoop.MINIMUM_TEMP
+            logger.info(f"Temperature: {instant_temperature}°C")
     return state
 
-def open_hatch_run():
+def open_hatch_run(pi):
     logger = logging.getLogger('hatch_logger')
-
-    checkloops = 100
-    delta_t = thecoop.OPEN_HATCH_TIME_TO_RUN/checkloops
-
-    GPIO.setup(thecoop.PIN_RELAY_PLUS_UP, GPIO.OUT)
-    GPIO.setup(thecoop.PIN_RELAY_MINUS_UP, GPIO.OUT)
-
-    logger.info("Hatch in motion")
-    #Save hatch status running to file
+    delta_t = thecoop.OPEN_HATCH_TIME_TO_RUN / 100
+    pi.write(thecoop.PIN_RELAY_PLUS_UP, 0)
+    pi.write(thecoop.PIN_RELAY_MINUS_UP, 0)
+    
     set_hatch_status(thecoop.STATUS_IN_MOTION, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
     
-    GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.LOW)
-    GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.LOW)
-
     timepassed = 0
-    while not limit_reached(thecoop.PIN_LIMIT_UP) and timepassed < thecoop.OPEN_HATCH_TIME_TO_RUN:
+    while not limit_reached(pi, thecoop.PIN_LIMIT_UP) and timepassed < thecoop.OPEN_HATCH_TIME_TO_RUN:
         time.sleep(delta_t)
-        timepassed = timepassed + delta_t
-
-    #time.sleep(thecoop.OPEN_HATCH_TIME_TO_RUN)
+        timepassed += delta_t
     
-    GPIO.output(thecoop.PIN_RELAY_PLUS_UP, GPIO.HIGH)
-    GPIO.output(thecoop.PIN_RELAY_MINUS_UP, GPIO.HIGH)
-
-
-    #Save hatch status open to file
+    pi.write(thecoop.PIN_RELAY_PLUS_UP, 1)
+    pi.write(thecoop.PIN_RELAY_MINUS_UP, 1)
     set_hatch_status(thecoop.STATUS_OPEN, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
-    print("Hatch open\n\n")
     logger.info("Hatch open")
 
-    return
-
-def open_hatch():
+def open_hatch(pi):
     logger = logging.getLogger('hatch_logger')
-    print("Event: Open hatch")
-    logger.info("Event: Open hatch")
-    
-    # First, check if hatch is open. Is , do not open
-    print("Checking hatch status")
     if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
-        logger.warning("Hatch is not closed, not proceding with opening hatch")
-    elif not is_hightemp():
-    # Check if temperature is too low
+        logger.warning("Hatch is not closed, not proceeding with opening hatch")
+    elif not is_hightemp(pi):
         logger.info("Temperature is low. Hatch not opening")
-        print("Temperature is low. Hatch not opening")
     else:
-        open_hatch_run()
+        open_hatch_run(pi)
 
-    return
-
-
-def close_hatch():
+def close_hatch(pi):
     logger = logging.getLogger('hatch_logger')
+    delta_t = thecoop.CLOSE_HATCH_TIME_TO_RUN / 100
+    pi.write(thecoop.PIN_RELAY_PLUS_DOWN, 0)
+    pi.write(thecoop.PIN_RELAY_MINUS_DOWN, 0)
 
-    checkloops = 100
-    delta_t = thecoop.CLOSE_HATCH_TIME_TO_RUN/checkloops
+    set_hatch_status(thecoop.STATUS_IN_MOTION, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
 
-    
-    print("Event: Close hatch")
-    logger.info("Event: Close hatch")
+    timepassed = 0
+    while not limit_reached(pi, thecoop.PIN_LIMIT_DOWN) and timepassed < thecoop.CLOSE_HATCH_TIME_TO_RUN:
+        time.sleep(delta_t)
+        timepassed += delta_t
 
-    # First, check if hatch is closed. Is , do not close
-    print("Checking hatch status")
-    if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_OPEN:
-        logger.warning("Hatch is already closed, not proceding with closing hatch")
-        print("Hatch is already closed, not proceding with closing hatch")
-    else:
-        print("Closing hatch")
-        GPIO.setup(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.OUT)
-        GPIO.setup(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.OUT)
+    pi.write(thecoop.PIN_RELAY_PLUS_DOWN, 1)
+    pi.write(thecoop.PIN_RELAY_MINUS_DOWN, 1)
+    set_hatch_status(thecoop.STATUS_CLOSED, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
+    logger.info("Hatch closed")
 
-        #Save hatch status running to file
-        set_hatch_status(thecoop.STATUS_IN_MOTION, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
-
-        GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.LOW)
-        GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.LOW)
-
-        timepassed = 0
-        while not limit_reached(thecoop.PIN_LIMIT_DOWN) and timepassed < thecoop.CLOSE_HATCH_TIME_TO_RUN:
-            time.sleep(delta_t)
-            timepassed = timepassed + delta_t
-        
-        GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.HIGH)
-        GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.HIGH)
-        #Save hatch status open to file
-        set_hatch_status(thecoop.STATUS_CLOSED, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
-
-        print("Hatch closed\n\n")
-        logger.info("Hatch closed")
-
-    return
-
-def button_pushed(channel):
-
+def button_pushed(channel, pi):
     global led_blinking
-    
-    print("Button pushed")
     logger = logging.getLogger('hatch_logger')
     logger.info("Event: Button pushed")
     
-    # Remove event detection to prevent multiple triggers
-    GPIO.remove_event_detect(channel)
-
-    # Start LED blinking in a separate thread
     led_blinking = True
-    led_thread = threading.Thread(target=blink_led)
+    led_thread = threading.Thread(target=blink_led, args=(pi,))
     led_thread.start()
 
     hatch_status = get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
-    
-    
     if hatch_status == thecoop.STATUS_CLOSED:
-        print("Checking hatch status")
-        if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
-            logger.warning("Hatch is not closed, not proceding with opening hatch")
-        else:
-            logger.info("Open hatch")              
-            open_hatch_run()        
+        open_hatch(pi)
     elif hatch_status == thecoop.STATUS_OPEN:
-        logger.info("Close hatch")
-        close_hatch()
-    elif hatch_status == thecoop.STATUS_IN_MOTION:
-        logger.waring("Hatch in motion. Doing nothing to change that")
+        close_hatch(pi)
 
-    #Stop flashing led
     led_blinking = False
-
-    # Add a short delay for debounce
     time.sleep(2.0)
-    # Re-enable event detection
-    GPIO.add_event_detect(channel, GPIO.GPIO.RISING, callback=button_pushed, bouncetime=500)
 
-    logger.info("End button pushed\n")
-        
-def blink_led():
-    """Function to blink LED while motor is running."""
+def blink_led(pi):
     global led_blinking
-
-    logger = logging.getLogger('hatch_logger')
-
-    logger.info("Blink led while led_blinking is true")
     while led_blinking:
-        GPIO.output(thecoop.PIN_RED_LED, GPIO.HIGH)
+        pi.write(thecoop.PIN_RED_LED, 1)
         time.sleep(0.5)
-        GPIO.output(thecoop.PIN_RED_LED, GPIO.LOW)
+        pi.write(thecoop.PIN_RED_LED, 0)
         time.sleep(0.5)
 
 def start_controller():
-    
     logger = logging.getLogger('hatch_logger')
-    logger.info("Starting logger")
+    pi = pigpio.pi()
+    if not pi.connected:
+        raise RuntimeError("Failed to connect to pigpio daemon")
 
-    logger.info("Setting up sun with local coordinates")
     sun = Sun(thecoop.LATITUDE, thecoop.LONGITUDE)
-
-    logger.info("Setting up background scheduler")
     sched = BackgroundScheduler()
+    sched.add_job(lambda: open_hatch(pi), 'cron', hour=thecoop.OPEN_HATCH_HOUR, minute=thecoop.OPEN_HATCH_MINUTE)
 
-
-    logger.info("Adding open hatch cron job")
-    sched.add_job(open_hatch, 'cron', hour=thecoop.OPEN_HATCH_HOUR, minute=thecoop.OPEN_HATCH_MINUTE)
-
-    logger.info("Get current year to set up cron schedule")
     today = datetime.date.today()
-    currentyear = today.year
-    
-    logger.info("Setting up close hatch cron jobs for each day 1 hour after sunset")
-    #Setting up dates times for sunset for all days in a leap year (2024)
-    for month in range(1,13):
-        for day in range(1,calendar.monthrange(currentyear, month)[1]+1):
-            date = datetime.date(currentyear, month, day)
-            sunset = sun.get_local_sunset_time(date)
-            sunset_plus_one_hour = sunset + datetime.timedelta(hours=1)
-            hour = sunset_plus_one_hour.strftime('%H')
-            minute = sunset_plus_one_hour.strftime('%M')
+    for month in range(1, 13):
+        for day in range(1, calendar.monthrange(today.year, month)[1] + 1):
+            sunset = sun.get_local_sunset_time(datetime.date(today.year, month, day)) + datetime.timedelta(hours=1)
+            sched.add_job(lambda: close_hatch(pi), 'cron', month=month, day=day, hour=sunset.hour, minute=sunset.minute)
 
-            sched.add_job(close_hatch, 'cron', month=month, day=day, hour=hour, minute=minute)
-
-    #sched.add_job(close_hatch, 'cron', hour=thecoop.CLOSE_HATCH_HOUR, minute=thecoop.CLOSE_HATCH_TIME_TO_RUN)
-
-    sched.print_jobs()
-    
-    logger.info("Starting cron job")
     sched.start()
-
-
     try:
-        GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-        GPIO.setup(thecoop.PIN_LIMIT_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
-        GPIO.setup(thecoop.PIN_LIMIT_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
-        
-        GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed, bouncetime=500)
-
+        pi.set_mode(thecoop.PIN_PUSH_BUTTON, pigpio.INPUT)
+        pi.set_pull_up_down(thecoop.PIN_PUSH_BUTTON, pigpio.PUD_UP)
+        pi.callback(thecoop.PIN_PUSH_BUTTON, pigpio.RISING_EDGE, lambda g, l, t: button_pushed(thecoop.PIN_PUSH_BUTTON, pi))
         while True:
             time.sleep(0.25)
-
-
     finally:
-        print("clean up")
-        GPIO.cleanup() # cleanup all GPIO
-
-
-    sched.shutdown()
-
-
-# Main script starting here
-
+        pi.stop()
+        sched.shutdown()
 
 if __name__ == '__main__':
-    print("Start main script")
-    
-    print("Init package from __init__.py")
-    
     start_controller()
