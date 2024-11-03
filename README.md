@@ -15,6 +15,8 @@ The system consists of
 
 The hatch of the chicken coop is set to open at a specified time (09:00) with cron schedule. However, if the temperature is lower than the specified temperature limit of the temperature measurement unit, the hatch will not open. A backup solution if the temperature measurement unit drops out for some reason is that Raspberry Pi calls the yr.no met API to check for the current temperature forecast, and checks if this is below a specified limit. The hatch opens one hour after sunset each day. The chickens have returned to the coop long before that.  The scheduling of this is handled through cron by sepeate jobs for each day of the year at specified times determined by the Suntime Python package. The hatch can be controlled via the push button as well. When the button is pushed, the door opens or closes independent of outdoor temperature. 
 
+In Octorber 2024 there was a software update on the Raspberry Pi which no longer allowed edge detection through GPIO. The code was therefore changed to use pigpio instead. This requires that the pigpio daemon is started on the Pi before the package is used, buy typing 'sudo pigpiod'.
+
 # Setup
 Follow the following instructions to set up the system:
 1. Download the newest Raspian 64 bit image to a SD card
