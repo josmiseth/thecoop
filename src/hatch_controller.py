@@ -149,13 +149,14 @@ def start_controller():
             sunset = sun.get_local_sunset_time(datetime.date(today.year, month, day)) + datetime.timedelta(hours=1)
             sched.add_job(lambda: close_hatch(pi), 'cron', month=month, day=day, hour=sunset.hour, minute=sunset.minute)
 
+    sched.print_jobs()
     sched.start()
     try:
         pi.set_mode(thecoop.PIN_PUSH_BUTTON, pigpio.INPUT)
         pi.set_pull_up_down(thecoop.PIN_PUSH_BUTTON, pigpio.PUD_UP)
         pi.callback(thecoop.PIN_PUSH_BUTTON, pigpio.RISING_EDGE, lambda g, l, t: button_pushed(thecoop.PIN_PUSH_BUTTON, pi))
         while True:
-            time.sleep(0.25)
+            time.sleep(1)
     finally:
         pi.stop()
         sched.shutdown()
