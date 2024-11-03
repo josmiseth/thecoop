@@ -43,10 +43,10 @@ CLOSE_HATCH_MINUTE = 41
 STATUS_CLOSED = '0'
 STATUS_OPEN = '1'
 STATUS_IN_MOTION = '2'
-#OPEN_HATCH_TIME_TO_RUN = 2.0 #0.7
-#CLOSE_HATCH_TIME_TO_RUN = 2.0 #0.5
-OPEN_HATCH_TIME_TO_RUN = 10.0 # Debug
-CLOSE_HATCH_TIME_TO_RUN = 10.0 # Debug
+OPEN_HATCH_TIME_TO_RUN = 20.0 #0.7
+CLOSE_HATCH_TIME_TO_RUN = 14.0 #0.5
+#OPEN_HATCH_TIME_TO_RUN = 10.0 # Debug
+#CLOSE_HATCH_TIME_TO_RUN = 10.0 # Debug
 
 
 PIN_RED_LED = 27
@@ -67,11 +67,19 @@ MINIMUM_TEMP = 4    # Degrees celcius
 def set_hatch_status(filename):
 
     logger = logging.getLogger('hatch_logger')
+    GPIO.output(PIN_RED_LED, GPIO.HIGH)  # Turn LED on
+
 
     if (limit_reached(PIN_LIMIT_UP)):
         status = STATUS_OPEN
+        GPIO.output(PIN_RED_LED, GPIO.LOW)   # Turn LED off
+        print("Status hatch open written to file")
+        logger.info("Status hatch open written to file")
     elif(limit_reached(PIN_LIMIT_DOWN)):
         status = STATUS_CLOSED
+        GPIO.output(PIN_RED_LED, GPIO.LOW)   # Turn LED off
+        print("Status hatch closed written to file")
+        logger.info("Status hatch closed written to file")
     else:
         print("Hatch position indecisive. Move to position fully open or fully closed")
         logger.error("Hatch position indecisive. Move to position fully open or fully closed")
@@ -113,6 +121,7 @@ def init_pins():
     # set up internal pull resistors
     GPIO.setup(PIN_LIMIT_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(PIN_LIMIT_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(PIN_PUSH_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     # Set the red red pin as an output
     GPIO.setup(PIN_RED_LED, GPIO.OUT)
@@ -130,5 +139,7 @@ init_pins()
 
 
 #Create status text file
-#set_hatch_status(STATUS_CLOSED, os.path.join(status_file_folder, status_file_name))
 set_hatch_status(os.path.join(status_file_folder, status_file_name))
+
+#Set led blinking status 
+led_blinking = False

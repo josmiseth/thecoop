@@ -7,7 +7,8 @@ import os
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
+#print(GPIO.VERSION)
+#GPIO.cleanup()  # Clean up any existing configurations before starting
 import src
 
 LED_PIN = src.PIN_RED_LED

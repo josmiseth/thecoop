@@ -12,6 +12,8 @@ sys.path.append('/home/josmi/projects/thecoop/')
 
 import requests
 
+import threading
+
 from apscheduler.schedulers.background import BackgroundScheduler
 import src as thecoop
 
@@ -64,7 +66,6 @@ def is_hightemp():
     
     state = False
     try:
-        GPIO.setmode(GPIO.BCM)
         GPIO.setup(thecoop.PIN_TEMP_RELAY, GPIO.IN)
         state = GPIO.input(thecoop.PIN_TEMP_RELAY)
         logger.info("Temperature pin state: ")
@@ -119,7 +120,6 @@ def open_hatch_run():
     checkloops = 100
     delta_t = thecoop.OPEN_HATCH_TIME_TO_RUN/checkloops
 
-    GPIO.setmode(GPIO.BCM)
     GPIO.setup(thecoop.PIN_RELAY_PLUS_UP, GPIO.OUT)
     GPIO.setup(thecoop.PIN_RELAY_MINUS_UP, GPIO.OUT)
 
@@ -184,7 +184,6 @@ def close_hatch():
         print("Hatch is already closed, not proceding with closing hatch")
     else:
         print("Closing hatch")
-        GPIO.setmode(GPIO.BCM)
         GPIO.setup(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.OUT)
         GPIO.setup(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.OUT)
 
@@ -198,10 +197,6 @@ def close_hatch():
         while not limit_reached(thecoop.PIN_LIMIT_DOWN) and timepassed < thecoop.CLOSE_HATCH_TIME_TO_RUN:
             time.sleep(delta_t)
             timepassed = timepassed + delta_t
-            print("Closing hatch")
-
-        #time.sleep(thecoop.CLOSE_HATCH_TIME_TO_RUN)
-
         
         GPIO.output(thecoop.PIN_RELAY_PLUS_DOWN, GPIO.HIGH)
         GPIO.output(thecoop.PIN_RELAY_MINUS_DOWN, GPIO.HIGH)
@@ -214,28 +209,60 @@ def close_hatch():
     return
 
 def button_pushed(channel):
+
+    global led_blinking
+    
     print("Button pushed")
     logger = logging.getLogger('hatch_logger')
     logger.info("Event: Button pushed")
     
+    # Remove event detection to prevent multiple triggers
+    GPIO.remove_event_detect(channel)
+
+    # Start LED blinking in a separate thread
+    led_blinking = True
+    led_thread = threading.Thread(target=blink_led)
+    led_thread.start()
+
     hatch_status = get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
     
-    if GPIO.input(channel) == GPIO.HIGH:
-        if hatch_status == thecoop.STATUS_CLOSED:
-            print("Checking hatch status")
-            if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
-                logger.warning("Hatch is not closed, not proceding with opening hatch")
-            else:
-                logger.info("Open hatch")              
-                open_hatch_run()        
-        elif hatch_status == thecoop.STATUS_OPEN:
-            logger.info("Close hatch")
-            close_hatch()
-        elif hatch_status == thecoop.STATUS_IN_MOTION:
-            logger.waring("Hatch in motion. Doing nothing to change that")
+    
+    if hatch_status == thecoop.STATUS_CLOSED:
+        print("Checking hatch status")
+        if get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name)) != thecoop.STATUS_CLOSED:
+            logger.warning("Hatch is not closed, not proceding with opening hatch")
+        else:
+            logger.info("Open hatch")              
+            open_hatch_run()        
+    elif hatch_status == thecoop.STATUS_OPEN:
+        logger.info("Close hatch")
+        close_hatch()
+    elif hatch_status == thecoop.STATUS_IN_MOTION:
+        logger.waring("Hatch in motion. Doing nothing to change that")
+
+    #Stop flashing led
+    led_blinking = False
+
+    # Add a short delay for debounce
+    time.sleep(2.0)
+    # Re-enable event detection
+    GPIO.add_event_detect(channel, GPIO.GPIO.RISING, callback=button_pushed, bouncetime=500)
+
     logger.info("End button pushed\n")
         
-        
+def blink_led():
+    """Function to blink LED while motor is running."""
+    global led_blinking
+
+    logger = logging.getLogger('hatch_logger')
+
+    logger.info("Blink led while led_blinking is true")
+    while led_blinking:
+        GPIO.output(thecoop.PIN_RED_LED, GPIO.HIGH)
+        time.sleep(0.5)
+        GPIO.output(thecoop.PIN_RED_LED, GPIO.LOW)
+        time.sleep(0.5)
+
 def start_controller():
     
     logger = logging.getLogger('hatch_logger')
@@ -276,17 +303,15 @@ def start_controller():
 
 
     try:
-        GPIO.setmode(GPIO.BCM)
-#        GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
         GPIO.setup(thecoop.PIN_PUSH_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
         GPIO.setup(thecoop.PIN_LIMIT_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
         GPIO.setup(thecoop.PIN_LIMIT_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP) # using the internal Pull up resistor
         
-        GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed, bouncetime=300)
+        GPIO.add_event_detect(thecoop.PIN_PUSH_BUTTON, GPIO.RISING, callback=button_pushed, bouncetime=500)
 
         while True:
-            time.sleep(10)
+            time.sleep(0.25)
 
 
     finally:
@@ -299,10 +324,10 @@ def start_controller():
 
 # Main script starting here
 
+
 if __name__ == '__main__':
     print("Start main script")
     
     print("Init package from __init__.py")
-    print("\n \n MAKE SURE HATCH IS PHYSICALLY CLOSED WHEN STARTING UP RASPBERRY PI \n \n")
-
+    
     start_controller()
