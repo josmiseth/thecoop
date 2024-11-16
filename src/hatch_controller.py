@@ -29,7 +29,7 @@ def set_hatch_status(status, filename):
     with open(filename, 'w') as file:
         file.write(status)
     logging.info(f"Status file written: {status}")
-    url_remote = f"http://10.0.0.54:8080/water-tank/insert_hatch_data.php?status={status}"
+    url_remote = f"http://10.0.0.54:8080/the-coop-page/insert_hatch_data.php?status={status}"
     cmd = f"curl -s {url_remote}"
     result = os.popen(cmd).read()
     logging.info(cmd)
