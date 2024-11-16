@@ -61,7 +61,7 @@ PIN_PUSH_BUTTON = 23
 LATITUDE = 63.446827
 LONGITUDE = 10.421906
 
-MINIMUM_TEMP = 4    # Degrees Celsius
+MINIMUM_TEMP = -1    # Degrees Celsius
 
 class HatchGPIO:
     def __init__(self):

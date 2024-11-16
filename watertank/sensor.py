@@ -3,148 +3,98 @@
 #Created by: Jitesh Saini
 #Modified by: Jo Smiseth
 
+# Code for the HCSR-04 ultrasound sensor
+
 #you can use the setup_cron.sh bash script to install a cron job to automatically execute this file every minute.
-
-import RPi.GPIO as GPIO
-import time,os
-
+import pigpio
+import time
+import os
 import datetime
-from gpiozero import Buzzer
 
+# GPIO pin definitions
 TRIG = 4
 ECHO = 24
 ALARM = 27
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
+# Initialize pigpio
+pi = pigpio.pi()
+if not pi.connected:
+    exit("Failed to connect to pigpio daemon.")
 
-GPIO.setup(TRIG,GPIO.OUT)
-GPIO.setup(ECHO,GPIO.IN)
-GPIO.output(TRIG, False)
+# Set up GPIO pins
+pi.set_mode(TRIG, pigpio.OUTPUT)
+pi.set_mode(ECHO, pigpio.INPUT)
+pi.set_mode(ALARM, pigpio.OUTPUT)
 
-GPIO.setup(ALARM,GPIO.OUT)
-GPIO.output(ALARM, False)
-#buzzer = Buzzer(ALARM)
+# Ensure initial states
+pi.write(TRIG, 0)
+pi.write(ALARM, 0)
 
-print ("Waiting For Sensor To Settle")
-time.sleep(1) #settling time 
-print("test1")
+print("Waiting for sensor to settle")
+time.sleep(1)  # Settling time
+
 def get_distance():
-   dist_add = 0
-   start_function = time.time()
-   for x in range(20):
-      try:
-         GPIO.output(TRIG, True)
-         time.sleep(0.00001)
-         GPIO.output(TRIG, False)
-         while GPIO.input(ECHO)==0:
-                 pulse_start = time.time()
-                 if time.time() - start_function > 10:
-                    dist_add = -20
-                    print("Raise exception")
+    dist_add = 0
+    start_function = time.time()
+    for x in range(20):
+        try:
+            # Trigger pulse
+            pi.write(TRIG, 1)
+            time.sleep(0.00001)
+            pi.write(TRIG, 0)
+            print("Sent trigger pulse")
+            # Measure pulse duration
+            while pi.read(ECHO) == 0:
+                pulse_start = time.time()
+                print(pi.read(ECHO))
+                if time.time() - start_function > 10:
                     raise Exception("No response from ultrasound unit")
-         while GPIO.input(ECHO)==1:
-                 pulse_end = time.time()
 
-         pulse_duration = pulse_end - pulse_start
-         distance = pulse_duration * 17150
-         distance = round(distance, 3)
-         print (x, "distance: ", distance)
-         dist_add = dist_add + distance
-         #print "dist_add: ", dist_add
-         time.sleep(.1) # 100ms interval between readings
+            while pi.read(ECHO) == 1:
+                pulse_end = time.time()
+
+            pulse_duration = pulse_end - pulse_start
+            distance = pulse_duration * 17150
+            dist_add += distance
+            print(x, "distance:", round(distance, 3))
+            time.sleep(0.1)  # 100ms interval between readings
          
-      except Exception as e: 
-	 
-         raise Exception(e)
+        except Exception as e:
+            raise Exception(e)
 
-   avg_dist=dist_add/20
-   dist=round(avg_dist,3)
+    avg_dist = dist_add / 20
+    return round(avg_dist, 3)
 
+def send_data_to_remote_server(dist):
+    url_remote = f"http://10.0.0.54:8080/water-tank/insert_data.php?dist={dist}"
+    cmd = f"curl -s {url_remote}"
+    os.system(cmd)
+    print(cmd)
 
-   #print ("dist: ", dist)
-   return dist
-
-   
-
-def sendData_to_remoteServer(dist):
-	#replace 192.168.1.2 with the IP address of your webserver
-	url_remote="http://10.0.0.54:8080/water-tank/insert_data.php?dist=" + str(dist)
-	cmd="curl -s " + url_remote
-	result=os.popen(cmd).read()
-	print (cmd)
-	
-		
-	
 def low_level_warning(dist):
-	tank_height=114 #set your tank height here
-	level=tank_height-dist
-	if(level<40):
-               print("level low : ", level)
-
-               for n in range(0,20):
-                      GPIO.output(ALARM, True)
-                      time.sleep(1)
-                      GPIO.output(ALARM, False)
-                      time.sleep(1)                      
-	else:
-		print("level ok")
-  # Welcome to the Tibber GraphQL Explorer
-  #
-  # GraphiQL is an in-browser tool for writing, validating, and
-  # testing GraphQL queries.
-  #
-  # Type queries into this side of the screen, and you will see intelligent
-  # typeaheads aware of the current GraphQL type schema and live syntax and
-  # validation errors highlighted within the text.
-  #
-  # GraphQL queries typically start with a "{" character. Lines that start
-  # with a # are ignored.
-  #
-  # Keyboard shortcuts:
-  #
-  #  Prettify Query:  Shift-Ctrl-P (or press the prettify button above)
-  #
-  #     Merge Query:  Shift-Ctrl-M (or press start the merge button above)
-  #
-  #       Run Query:  Ctrl-Enter (or press the play button above)
-  #
-  #   Auto Complete:  Ctrl-Space (or just start typing)
-  #
-
-  
-#  mutation{
-#    sendPushNotification(
-#      input:
-#      {
-#        title: "Low water level",
-#       	message:"The drinking water level in the chicken coop is low. Fill up the water tank",
-#        screenToOpen:HOME
-#      }
-#    )
-#    {
-#      successful,
-#      pushedToNumberOfDevices,
-#      __typename
-#    }
-#  }
-#		
+    tank_height = 114  # Set your tank height here
+    level = tank_height - dist
+    if level < 40:
+        print("Level low:", level)
+        for _ in range(20):
+            pi.write(ALARM, 1)
+            time.sleep(1)
+            pi.write(ALARM, 0)
+            time.sleep(1)
+    else:
+        print("Level OK")
 
 def main():
-   try:
-      distance=get_distance()
-      print ("distance: ", distance)
-      sendData_to_remoteServer(distance)
-      low_level_warning(distance)
-      print ("---------------------")
+    try:
+        distance = get_distance()
+        print("Distance:", distance)
+        send_data_to_remote_server(distance)
+        low_level_warning(distance)
+        print("---------------------")
+    except Exception as e:
+        print(f"Measurement failed with exception: {e}")
+    finally:
+        pi.stop()  # Close pigpio connection
 
-   except Exception as e: 
-	   print("Measurement failed with exception: %s" % e)
-      
-        
-	
-	
-	
 if __name__ == '__main__':
     main()
-

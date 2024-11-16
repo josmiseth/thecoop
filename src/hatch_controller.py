@@ -8,11 +8,12 @@ import os
 import sys
 import logging
 sys.path.append('/home/josmi/projects/thecoop/')
+import src as thecoop
 
 import requests
 import threading
 from apscheduler.schedulers.background import BackgroundScheduler
-import src as thecoop
+
 from flask import Flask
 import pigpio
 
@@ -50,19 +51,53 @@ def is_hightemp(pi):
         state = False
 
     if not state:
+
+        # Get current date and set target timestamp at 13:00 UTC
+        current_date = datetime.utcnow().strftime('%Y-%m-%d')
+        target_timestamp = f"{current_date}T13:00:00Z"
+
         latitude, longitude = thecoop.LATITUDE, thecoop.LONGITUDE
         url = f'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}'
         headers = {'User-Agent': 'theCoop github.com/josmiseth/thecoop.git'}
         
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            met_data = response.json()
-            instant_temperature = met_data["properties"]["timeseries"][0]["data"]["instant"]["details"]["air_temperature"]
-            state = instant_temperature > thecoop.MINIMUM_TEMP
-            logger.info(f"Temperature: {instant_temperature}°C")
+        state = True  # Default to "yes" if an exception occurs
+
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Raises HTTPError for bad responses (4xx and 5xx)
+
+            try:
+                met_data = response.json()
+                try:
+                    time_data = met_data["properties"]["timeseries"]
+                    # Extract the record matching the target timestamp
+                    record = next((item for item in time_data if item['time'] == target_timestamp), None)
+                    if record:
+                        day_temp = record["data"]["instant"]["details"]["air_temperature"]
+                        state = day_temp > thecoop.MINIMUM_TEMP
+                        logging.info(f"Day temperature forecast: {day_temp}°C")
+                    else:
+                        logging.info("No record found for 13:00 UTC on the current date.")
+                        logging.info("Trying to use instant temperature")
+                        instant_temperature = met_data["properties"]["timeseries"][0]["data"]["instant"]["details"]["air_temperature"]
+                        state = instant_temperature > thecoop.MINIMUM_TEMP
+                        logger.info(f"Temperature: {instant_temperature}°C")
+                except (KeyError, IndexError) as e:
+                    logger.error(f"Error accessing temperature data: {e}")
+            except ValueError as e:
+                logger.error(f"Error decoding JSON response: {e}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"HTTP request failed: {e}")
+
+        # state will remain True if any exception is thrown. So, if the met.no api fails the hatch will open
     return state
 
 def open_hatch_run(pi):
+    global led_blinking
+    led_blinking = True
+    led_thread = threading.Thread(target=blink_led, args=(pi,))
+    led_thread.start()
+
     logger = logging.getLogger('hatch_logger')
     delta_t = thecoop.OPEN_HATCH_TIME_TO_RUN / 100
     pi.write(thecoop.PIN_RELAY_PLUS_UP, 0)
@@ -79,6 +114,7 @@ def open_hatch_run(pi):
     pi.write(thecoop.PIN_RELAY_MINUS_UP, 1)
     set_hatch_status(thecoop.STATUS_OPEN, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
     logger.info("Hatch open")
+    led_blinking = False
 
 def open_hatch(pi):
     logger = logging.getLogger('hatch_logger')
@@ -90,7 +126,14 @@ def open_hatch(pi):
         open_hatch_run(pi)
 
 def close_hatch(pi):
+    global led_blinking
+    
     logger = logging.getLogger('hatch_logger')
+
+    led_blinking = True
+    led_thread = threading.Thread(target=blink_led, args=(pi,))
+    led_thread.start()
+
     delta_t = thecoop.CLOSE_HATCH_TIME_TO_RUN / 100
     pi.write(thecoop.PIN_RELAY_PLUS_DOWN, 0)
     pi.write(thecoop.PIN_RELAY_MINUS_DOWN, 0)
@@ -106,6 +149,7 @@ def close_hatch(pi):
     pi.write(thecoop.PIN_RELAY_MINUS_DOWN, 1)
     set_hatch_status(thecoop.STATUS_CLOSED, os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
     logger.info("Hatch closed")
+    led_blinking = False
 
 def button_pushed(channel, pi):
     global led_blinking
@@ -117,12 +161,15 @@ def button_pushed(channel, pi):
     led_thread.start()
 
     hatch_status = get_hatch_status(os.path.join(thecoop.status_file_folder, thecoop.status_file_name))
+
+    led_blinking = False
+
     if hatch_status == thecoop.STATUS_CLOSED:
-        open_hatch(pi)
+        open_hatch_run(pi)
     elif hatch_status == thecoop.STATUS_OPEN:
         close_hatch(pi)
 
-    led_blinking = False
+    
     time.sleep(2.0)
 
 def blink_led(pi):
