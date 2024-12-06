@@ -29,7 +29,7 @@ def set_hatch_status(status, filename):
     with open(filename, 'w') as file:
         file.write(status)
     logging.info(f"Status file written: {status}")
-    url_remote = f"http://10.0.0.54:8080/the-coop-page/insert_hatch_data.php?status={status}"
+    url_remote = f"http://10.0.0.54:80/the-coop-page/insert_hatch_data.php?status={status}"
     cmd = f"curl -s {url_remote}"
     result = os.popen(cmd).read()
     logging.info(cmd)
@@ -53,8 +53,8 @@ def is_hightemp(pi):
     if not state:
 
         # Get current date and set target timestamp at 13:00 UTC
-        current_date = datetime.utcnow().strftime('%Y-%m-%d')
-        target_timestamp = f"{current_date}T13:00:00Z"
+        today = datetime.date.today()
+        target_timestamp = f"{today}T13:00:00Z"
 
         latitude, longitude = thecoop.LATITUDE, thecoop.LONGITUDE
         url = f'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latitude}&lon={longitude}'
@@ -90,6 +90,8 @@ def is_hightemp(pi):
             logger.error(f"HTTP request failed: {e}")
 
         # state will remain True if any exception is thrown. So, if the met.no api fails the hatch will open
+    logging.info("Return is_hightemp state:")
+    logging.info(state)
     return state
 
 def open_hatch_run(pi):

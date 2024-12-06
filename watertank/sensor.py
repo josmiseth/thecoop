@@ -36,7 +36,7 @@ time.sleep(1)  # Settling time
 def get_distance():
     dist_add = 0
     start_function = time.time()
-    for x in range(4):
+    for x in range(20):
         try:
             # Trigger pulse
             pi.write(TRIG, 1)
@@ -46,7 +46,7 @@ def get_distance():
             # Measure pulse duration
             while pi.read(ECHO) == 0:
                 pulse_start = time.time()
-                print(pi.read(ECHO))
+                #print(pi.read(ECHO))
                 if time.time() - start_function > 10:
                     raise Exception("No response from ultrasound unit")
 
@@ -66,7 +66,7 @@ def get_distance():
     return round(avg_dist, 3)
 
 def send_data_to_remote_server(dist):
-    url_remote = f"http://10.0.0.54:8080/the-coop-page/insert_data.php?dist={dist}"
+    url_remote = f"http://10.0.0.54:80/the-coop-page/insert_data.php?dist={dist}"
     cmd = f"curl -s {url_remote}"
     os.system(cmd)
     print(cmd)
