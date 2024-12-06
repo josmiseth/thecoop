@@ -33,6 +33,7 @@ Follow the following instructions to set up the system:
 1. Install Suntime with: sudo apt install python3-suntime
 1. Run: python3 ~/projects/thecoop/src/hatch_controller.py
 1. Log on a terminal via ssh
+1. Run the pigipod deamon: sudo pigpiod
 1. Run: nohup python3 ~/projects/thecoop/src/hatch_controller.py &
 1. Terminate terminal, and the process will continue to run.
 
